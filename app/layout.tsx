@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/lib/theme-context"
 import { LanguageProvider } from "@/lib/language-context"
 import { AccessibilitySkipLink } from "@/components/accessibility-skip-link"
 import "./globals.css"
+import {ScrollToTopButton} from "@/components/sroll-to-top-button";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const firaCode = Fira_Code({ subsets: ["latin"], variable: "--font-mono" })
@@ -35,6 +36,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AccessibilitySkipLink />
             {children}
+              <ScrollToTopButton />
           </LanguageProvider>
         </ThemeProvider>
       </body>

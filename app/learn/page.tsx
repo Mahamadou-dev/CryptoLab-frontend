@@ -1,130 +1,89 @@
 "use client"
 
 import { Navigation } from "@/components/navigation"
-import { PageHeader } from "@/components/page-header"
+// import { PageHeader } from "@/components/page-header" // Non utilisé dans cette version
 import { LearnCard } from "@/components/learn-card"
 import { useLanguage } from "@/lib/language-context"
-
-const courses = [
-  {
-    id: "caesar-theory",
-    title: "Caesar Cipher: The Foundation",
-    excerpt:
-      "Understand the oldest encryption method and how it shaped modern cryptography. Learn basic concepts of substitution ciphers.",
-    category: "Beginner" as const,
-  },
-  {
-    id: "symmetric-encryption",
-    title: "Symmetric Encryption Explained",
-    excerpt:
-      "Deep dive into AES and DES. Learn how shared keys work and why symmetric encryption is crucial for data security.",
-    category: "Intermediate" as const,
-  },
-  {
-    id: "public-key-crypto",
-    title: "Public-Key Cryptography",
-    excerpt:
-      "Master RSA, asymmetric encryption, and digital signatures. Perfect for understanding modern secure communication.",
-    category: "Advanced" as const,
-  },
-  {
-    id: "hashing",
-    title: "Cryptographic Hashing",
-    excerpt:
-      "Explore one-way functions, password security, and blockchain technology. Learn why hashing is essential for data integrity.",
-    category: "Intermediate" as const,
-  },
-  {
-    id: "elliptic-curves",
-    title: "Elliptic Curve Cryptography",
-    excerpt: "Understand ECC, its advantages over RSA, and its applications in modern security protocols.",
-    category: "Advanced" as const,
-  },
-  {
-    id: "key-exchange",
-    title: "Key Exchange Protocols",
-    excerpt: "Learn about Diffie-Hellman, ECDH, and how secure communication is established over insecure channels.",
-    category: "Advanced" as const,
-  },
-]
+import { algorithms } from "@/lib/algorithms"
+import { useTranslation } from "@/lib/i18n"
 
 export default function LearnPage() {
-  const { language } = useLanguage()
+    const { language } = useLanguage()
+    const t = useTranslation(language)
 
-  return (
-    <main className="min-h-screen bg-background">
-      <Navigation />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <PageHeader
-          title={language === "en" ? "Learn Cryptography" : "Apprendre la cryptographie"}
-          description={
-            language === "en"
-              ? "Choose your learning path and master cryptographic algorithms through interactive content and visualizations."
-              : "Choisissez votre chemin d'apprentissage et maîtrisez les algorithmes cryptographiques."
-          }
-        />
+    // Mapper les difficultés aux catégories (pour la nouvelle structure)
+    // Les clés de cet objet DOIVENT correspondre aux valeurs de 'difficulty' dans lib/algorithms.ts
+    const difficultyMap = {
+        "difficulty.beginner": {
+            nameKey: "learn.level.beginner",
+            color: "bg-[var(--color-violet)]/10 text-[var(--color-violet)] border border-[var(--color-violet)]/20",
+        },
+        "difficulty.intermediate": {
+            nameKey: "learn.level.intermediate",
+            color: "bg-[var(--color-magenta)]/10 text-[var(--color-magenta)] border border-[var(--color-magenta)]/20",
+        },
+        "difficulty.advanced": {
+            nameKey: "learn.level.advanced",
+            color: "bg-[var(--color-rose)]/10 text-[var(--color-rose)] border border-[var(--color-rose)]/20",
+        },
+    }
 
-        <div className="space-y-12">
-          {/* Beginner Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-green-500/20 to-green-400/20 border border-green-500/30">
-                <span className="text-sm font-semibold text-green-300">
-                  {language === "en" ? "Beginner" : "Débutant"}
-                </span>
-              </div>
-              <h2 className="text-2xl font-bold">{language === "en" ? "Start Here" : "Commencez ici"}</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courses
-                .filter((c) => c.category === "Beginner")
-                .map((course) => (
-                  <LearnCard key={course.id} {...course} href={`/learn/${course.id}`} />
-                ))}
-            </div>
-          </section>
+    return (
+        <main className="min-h-screen">
+            <Navigation />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-          {/* Intermediate Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-yellow-400/20 border border-yellow-500/30">
-                <span className="text-sm font-semibold text-yellow-300">
-                  {language === "en" ? "Intermediate" : "Intermédiaire"}
-                </span>
-              </div>
-              <h2 className="text-2xl font-bold">
-                {language === "en" ? "Build Your Skills" : "Améliorez vos compétences"}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courses
-                .filter((c) => c.category === "Intermediate")
-                .map((course) => (
-                  <LearnCard key={course.id} {...course} href={`/learn/${course.id}`} />
-                ))}
-            </div>
-          </section>
+                {/* En-tête */}
+                <div className="mb-12 pt-8">
+                    <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gradient">
+                        {t("learn.title")}
+                    </h1>
+                    <p className="text-lg text-foreground-secondary">
+                        {t("learn.description")}
+                    </p>
+                </div>
 
-          {/* Advanced Section */}
-          <section className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-red-500/20 to-red-400/20 border border-red-500/30">
-                <span className="text-sm font-semibold text-red-300">{language === "en" ? "Advanced" : "Avancé"}</span>
-              </div>
-              <h2 className="text-2xl font-bold">
-                {language === "en" ? "Master Cryptography" : "Maîtrisez la cryptographie"}
-              </h2>
+                {/* Structure basée sur la difficulté */}
+                <div className="space-y-12">
+                    {(Object.entries(difficultyMap) as [string, { nameKey: string, color: string }][]).map(([levelKey, { nameKey, color }]) => {
+                        // Filtrer les algorithmes pour ce niveau de difficulté
+                        // CAST nécessaire ici si TS se plaint encore, mais devrait aller avec le bon lib/algorithms.ts
+                        const levelAlgos = algorithms.filter(a => a.difficulty === levelKey);
+
+                        if (levelAlgos.length === 0) return null
+
+                        return (
+                            <section className="space-y-6" key={levelKey}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`inline-block px-4 py-1 rounded-full ${color}`}>
+                                        <span className="text-sm font-semibold">
+                                            {/* Traduit le niveau de difficulté (ex: "Débutant") */}
+                                            {t(levelKey)}
+                                        </span>
+                                    </div>
+                                    {/* Traduit le titre de la section (ex: "Commencez ici") */}
+                                    <h2 className="text-2xl font-bold">{t(nameKey)}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {levelAlgos.map((algo) => (
+                                        <LearnCard
+                                            key={algo.id}
+                                            id={algo.id}
+                                            // IMPORTANT : On traduit le nom et la description ICI avant de les passer
+                                            title={t(algo.name)}
+                                            excerpt={t(algo.description)}
+                                            // On passe la clé brute de difficulté pour que LearnCard puisse gérer ses styles si besoin
+                                            category={algo.difficulty}
+                                            icon={algo.icon}
+                                            href={`/learn/${algo.id}`}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )
+                    })}
+                </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {courses
-                .filter((c) => c.category === "Advanced")
-                .map((course) => (
-                  <LearnCard key={course.id} {...course} href={`/learn/${course.id}`} />
-                ))}
-            </div>
-          </section>
-        </div>
-      </div>
-    </main>
-  )
+        </main>
+    )
 }

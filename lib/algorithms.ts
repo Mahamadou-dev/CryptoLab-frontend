@@ -1,117 +1,128 @@
+// Fichier : lib/algorithms.ts
+
 export type AlgorithmType = "classic" | "symmetric" | "asymmetric" | "hash"
-export type Difficulty = "Beginner" | "Intermediate" | "Advanced"
+export type Difficulty = "difficulty.beginner" | "difficulty.intermediate" | "difficulty.advanced"
 
 export interface Algorithm {
-  id: string
-  name: string
-  description: string
-  difficulty: Difficulty
-  icon: string
-  category: AlgorithmType
-  uses: string[]
-  keySize?: string
-  blockSize?: string
+    id: string
+    name: string // Clé i18n
+    description: string // Clé i18n
+    difficulty: Difficulty // Clé i18n
+    icon: string
+    category: AlgorithmType
+    uses: string // Clé i18n (formaté avec des '|' dans i18n.ts)
+    keySize?: string
+    blockSize?: string
 }
 
 export const algorithms: Algorithm[] = [
-  {
-    id: "caesar",
-    name: "Caesar Cipher",
-    description: "Ancient substitution cipher: shift each letter by a fixed amount",
-    difficulty: "Beginner",
-    icon: "🔤",
-    category: "classic",
-    uses: ["Education", "Historical interest"],
-  },
-  {
-    id: "vigenere",
-    name: "Vigenère Cipher",
-    description: "Polyalphabetic substitution using a keyword",
-    difficulty: "Intermediate",
-    icon: "🔑",
-    category: "classic",
-    uses: ["Historical cryptography", "Educational"],
-  },
-  {
-    id: "playfair",
-    name: "Playfair Cipher",
-    description: "5×5 grid-based encryption technique",
-    difficulty: "Intermediate",
-    icon: "⊞",
-    category: "classic",
-    uses: ["Classic ciphers", "Learning"],
-  },
-  {
-    id: "des",
-    name: "DES",
-    description: "Data Encryption Standard: symmetric block cipher",
-    difficulty: "Advanced",
-    icon: "🔐",
-    category: "symmetric",
-    uses: ["Legacy systems", "Historical reference"],
-    keySize: "56 bits",
-    blockSize: "64 bits",
-  },
-  {
-    id: "aes",
-    name: "AES",
-    description: "Advanced Encryption Standard: modern symmetric encryption",
-    difficulty: "Advanced",
-    icon: "🛡️",
-    category: "symmetric",
-    uses: ["Data encryption", "Government standard", "Industry standard"],
-    keySize: "128, 192, 256 bits",
-    blockSize: "128 bits",
-  },
-  {
-    id: "rsa",
-    name: "RSA",
-    description: "Asymmetric public-key cryptography",
-    difficulty: "Advanced",
-    icon: "🔓",
-    category: "asymmetric",
-    uses: ["Digital signatures", "Key exchange", "Secure communication"],
-    keySize: "1024-4096 bits",
-  },
-  {
-    id: "sha256",
-    name: "SHA-256",
-    description: "Cryptographic hash function for data integrity",
-    difficulty: "Intermediate",
-    icon: "#️⃣",
-    category: "hash",
-    uses: ["Data integrity", "Password hashing", "Blockchain"],
-  },
-  {
-    id: "bcrypt",
-    name: "bcrypt",
-    description: "Password hashing algorithm with salt",
-    difficulty: "Intermediate",
-    icon: "🔒",
-    category: "hash",
-    uses: ["Password storage", "Security", "Authentication"],
-  },
+    {
+        id: "caesar",
+        name: "algo.caesar.name",
+        description: "algo.caesar.description",
+        difficulty: "difficulty.beginner",
+        icon: "🔤",
+        category: "classic",
+        uses: "algo.caesar.uses",
+    },
+    {
+        id: "vigenere",
+        name: "algo.vigenere.name",
+        description: "algo.vigenere.description",
+        difficulty: "difficulty.intermediate",
+        icon: "🔑",
+        category: "classic",
+        uses: "algo.vigenere.uses",
+    },
+    {
+        id: "playfair",
+        name: "algo.playfair.name",
+        description: "algo.playfair.description",
+        difficulty: "difficulty.intermediate",
+        icon: "⊞",
+        category: "classic",
+        uses: "algo.playfair.uses",
+    },
+    {
+        id: "railfence",
+        name: "algo.railfence.name",
+        description: "algo.railfence.description",
+        difficulty: "difficulty.beginner",
+        icon: "🛤️",
+        category: "classic",
+        uses: "algo.railfence.uses",
+    },
+    {
+        id: "des",
+        name: "algo.des.name",
+        description: "algo.des.description",
+        difficulty: "difficulty.advanced",
+        icon: "🔐",
+        category: "symmetric",
+        uses: "algo.des.uses",
+        keySize: "56 bits",
+        blockSize: "64 bits",
+    },
+    {
+        id: "aes",
+        name: "algo.aes.name",
+        description: "algo.aes.description",
+        difficulty: "difficulty.advanced",
+        icon: "🛡️",
+        category: "symmetric",
+        uses: "algo.aes.uses",
+        keySize: "128, 192, 256 bits",
+        blockSize: "128 bits",
+    },
+    {
+        id: "rsa",
+        name: "algo.rsa.name",
+        description: "algo.rsa.description",
+        difficulty: "difficulty.advanced",
+        icon: "🔓",
+        category: "asymmetric",
+        uses: "algo.rsa.uses",
+        keySize: "1024-4096 bits",
+    },
+    {
+        id: "sha256",
+        name: "algo.sha256.name",
+        description: "algo.sha256.description",
+        difficulty: "difficulty.intermediate",
+        icon: "#️⃣",
+        category: "hash",
+        uses: "algo.sha256.uses",
+    },
+    {
+        id: "bcrypt",
+        name: "algo.bcrypt.name",
+        description: "algo.bcrypt.description",
+        difficulty: "difficulty.intermediate",
+        icon: "🔒",
+        category: "hash",
+        uses: "algo.bcrypt.uses",
+    },
 ]
 
 export const categoryInfo = {
-  classic: {
-    name: "Classic Ciphers",
-    description: "Historical encryption methods that demonstrate fundamental concepts",
-    color: "from-blue-500 to-cyan-500",
-  },
-  symmetric: {
-    name: "Symmetric Encryption",
-    description: "Uses the same key for both encryption and decryption",
-    color: "from-purple-500 to-pink-500",
-  },
-  asymmetric: {
-    name: "Asymmetric Encryption",
-    description: "Uses public and private keys for secure communication",
-    color: "from-orange-500 to-red-500",
-  },
-  hash: {
-    name: "Hash Functions",
-    description: "One-way functions for data integrity and security",
-    color: "from-green-500 to-emerald-500",
-  },
+    classic: {
+        name: "category.classic.name",
+        description: "category.classic.description",
+        color: "from-blue-500 to-cyan-500",
+    },
+    symmetric: {
+        name: "category.symmetric.name",
+        description: "category.symmetric.description",
+        color: "from-purple-500 to-pink-500",
+    },
+    asymmetric: {
+        name: "category.asymmetric.name",
+        description: "category.asymmetric.description",
+        color: "from-orange-500 to-red-500",
+    },
+    hash: {
+        name: "category.hash.name",
+        description: "category.hash.description",
+        color: "from-green-500 to-emerald-500",
+    },
 }

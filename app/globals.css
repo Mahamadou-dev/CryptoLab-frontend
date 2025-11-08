@@ -4,426 +4,304 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+    /* === Variables de Thème Génériques === */
+    /* Elles servent de fallback (au cas où) et sont écrasées par les thèmes */
+    --color-primary: #7e22ce;
+    --color-secondary: #ec4899;
+    --color-tertiary: #c026d3;
+    --color-accent: #4c1d95;
 
-  /* Enhanced gradient colors for themes */
-  --accent-primary: #8b5cf6;
-  --accent-secondary: #a78bfa;
-  --accent-tertiary: #c4b5fd;
-  --accent-magenta: #a855f7;
+    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    --gradient-secondary: linear-gradient(135deg, var(--color-tertiary), var(--color-primary));
 
-  /* Gradient backgrounds */
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
-  --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    --background: #0b0013;
+    --foreground: #fdf4ff;
+    --bg-gradient-stop-1: #3b0764;
+    --bg-gradient-stop-2: #831843;
 
-  /* Improved light mode surface colors with better contrast */
-  --surface: rgb(139 92 246 / 0.12);
-  --surface-hover: rgb(139 92 246 / 0.18);
-  --surface-active: rgb(139 92 246 / 0.25);
-  --border-color: rgb(139 92 246 / 0.25);
-  --border-color-hover: rgb(139 92 246 / 0.45);
+    --surface: rgba(126, 34, 206, 0.12);
+    --surface-hover: rgba(236, 72, 153, 0.18);
+    --surface-active: rgba(236, 72, 153, 0.25);
+    --border-color: rgba(236, 72, 153, 0.25);
+    --border-color-hover: rgba(236, 72, 153, 0.45);
+    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4),
+    0 0 45px rgba(126, 34, 206, 0.25);
 
-  --background-secondary: #f5f3ff;
-  --background-tertiary: #ede9fe;
-  --foreground-secondary: #6d28d9;
-  --foreground-tertiary: #7c3aed;
+    --font-sans: "Inter", sans-serif;
+    --font-mono: "Fira Code", monospace;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+/* === THÈME 1: GEMINI (Votre thème actuel) === */
+/* Définit les variables génériques ET les variables spécifiques */
+.theme-gemini {
+    /* 1. Nouvelles variables génériques */
+    --color-primary: #7e22ce;
+    --color-secondary: #ec4899;
+    --color-tertiary: #c026d3;
+    --color-accent: #4c1d95;
 
-  /* Improved dark mode surface colors with better contrast */
-  --surface: rgb(139 92 246 / 0.15);
-  --surface-hover: rgb(139 92 246 / 0.22);
-  --surface-active: rgb(139 92 246 / 0.3);
-  --border-color: rgb(139 92 246 / 0.3);
-  --border-color-hover: rgb(139 92 246 / 0.5);
+    /* 2. Variables spécifiques (pour la compatibilité ascendante) */
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
 
-  --gradient-primary: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #8b5cf6 100%);
-  --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
-
-  --background-secondary: #2e1065;
-  --background-tertiary: #3f0f63;
-  --foreground-secondary: #d8b4fe;
-  --foreground-tertiary: #c4b5fd;
+    /* 3. Variables Glassmorphism (identiques) */
+    --surface: rgba(126, 34, 206, 0.12);
+    --surface-hover: rgba(236, 72, 153, 0.18);
+    --surface-active: rgba(236, 72, 153, 0.25);
+    --border-color: rgba(236, 72, 153, 0.25);
+    --border-color-hover: rgba(236, 72, 153, 0.45);
+    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4),
+    0 0 45px rgba(126, 34, 206, 0.25);
 }
 
-/* Red theme with gradient */
-.theme-red {
-  --accent-primary: #ef4444;
-  --accent-secondary: #f87171;
-  --accent-tertiary: #fca5a5;
-  --accent-magenta: #dc2626;
-
-  --gradient-primary: linear-gradient(135deg, #ef4444 0%, #f87171 50%, #fca5a5 100%);
-  --gradient-secondary: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
-
-  --surface: rgb(239 68 68 / 0.12);
-  --surface-hover: rgb(239 68 68 / 0.18);
-  --surface-active: rgb(239 68 68 / 0.25);
-  --border-color: rgb(239 68 68 / 0.25);
-  --border-color-hover: rgb(239 68 68 / 0.45);
-}
-
-.dark.theme-red {
-  --gradient-primary: linear-gradient(135deg, #fca5a5 0%, #f87171 50%, #ef4444 100%);
-  --gradient-secondary: linear-gradient(135deg, #f87171 0%, #fca5a5 100%);
-
-  --surface: rgb(239 68 68 / 0.15);
-  --surface-hover: rgb(239 68 68 / 0.22);
-  --surface-active: rgb(239 68 68 / 0.3);
-  --border-color: rgb(239 68 68 / 0.3);
-  --border-color-hover: rgb(239 68 68 / 0.5);
-
-  --background-secondary: #7f1d1d;
-  --background-tertiary: #991b1b;
-  --foreground-secondary: #fecaca;
-  --foreground-tertiary: #fca5a5;
-}
-
-/* Blue theme with gradient */
-.theme-blue {
-  --accent-primary: #3b82f6;
-  --accent-secondary: #60a5fa;
-  --accent-tertiary: #93c5fd;
-  --accent-magenta: #0284c7;
-
-  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
-  --gradient-secondary: linear-gradient(135deg, #60a5fa 0%, #0284c7 100%);
-
-  --surface: rgb(59 130 246 / 0.12);
-  --surface-hover: rgb(59 130 246 / 0.18);
-  --surface-active: rgb(59 130 246 / 0.25);
-  --border-color: rgb(59 130 246 / 0.25);
-  --border-color-hover: rgb(59 130 246 / 0.45);
-}
-
-.dark.theme-blue {
-  --gradient-primary: linear-gradient(135deg, #93c5fd 0%, #60a5fa 50%, #3b82f6 100%);
-  --gradient-secondary: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
-
-  --surface: rgb(59 130 246 / 0.15);
-  --surface-hover: rgb(59 130 246 / 0.22);
-  --surface-active: rgb(59 130 246 / 0.3);
-  --border-color: rgb(59 130 246 / 0.3);
-  --border-color-hover: rgb(59 130 246 / 0.5);
-
-  --background-secondary: #0c2340;
-  --background-tertiary: #1e3a8a;
-  --foreground-secondary: #bfdbfe;
-  --foreground-tertiary: #93c5fd;
-}
-
-/* Pink theme with gradient */
-.theme-pink {
-  --accent-primary: #ec4899;
-  --accent-secondary: #f472b6;
-  --accent-tertiary: #fbcfe8;
-  --accent-magenta: #be185d;
-
-  --gradient-primary: linear-gradient(135deg, #ec4899 0%, #f472b6 50%, #fbcfe8 100%);
-  --gradient-secondary: linear-gradient(135deg, #f472b6 0%, #be185d 100%);
-
-  --surface: rgb(236 72 153 / 0.12);
-  --surface-hover: rgb(236 72 153 / 0.18);
-  --surface-active: rgb(236 72 153 / 0.25);
-  --border-color: rgb(236 72 153 / 0.25);
-  --border-color-hover: rgb(236 72 153 / 0.45);
-}
-
-.dark.theme-pink {
-  --gradient-primary: linear-gradient(135deg, #fbcfe8 0%, #f472b6 50%, #ec4899 100%);
-  --gradient-secondary: linear-gradient(135deg, #f472b6 0%, #fbcfe8 100%);
-
-  --surface: rgb(236 72 153 / 0.15);
-  --surface-hover: rgb(236 72 153 / 0.22);
-  --surface-active: rgb(236 72 153 / 0.25);
-  --border-color: rgb(236 72 153 / 0.3);
-  --border-color-hover: rgb(236 72 153 / 0.5);
-
-  --background-secondary: #831843;
-  --background-tertiary: #be123c;
-  --foreground-secondary: #fbcfe8;
-  --foreground-tertiary: #f472b6;
-}
-
-/* Purple theme with gradient */
+/* === THÈME 2: EXEMPLE VIOLET (Thème alternatif) === */
 .theme-purple {
-  --accent-primary: #8b5cf6;
-  --accent-secondary: #a78bfa;
-  --accent-tertiary: #c4b5fd;
-  --accent-magenta: #a855f7;
+    /* 1. Nouvelles variables génériques */
+    --color-primary: #8b5cf6;
+    --color-secondary: #a78bfa;
+    --color-tertiary: #7c3aed;
+    --color-accent: #6d28d9;
 
-  --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
-  --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    /* 2. Variables spécifiques (pour la compatibilité ascendante) */
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
 
-  --surface: rgb(139 92 246 / 0.12);
-  --surface-hover: rgb(139 92 246 / 0.18);
-  --surface-active: rgb(139 92 246 / 0.25);
-  --border-color: rgb(139 92 246 / 0.25);
-  --border-color-hover: rgb(139 92 246 / 0.45);
+    /* 3. Variables Glassmorphism (ajustées au thème) */
+    --surface: rgba(139, 92, 246, 0.12);
+    --surface-hover: rgba(139, 92, 246, 0.18);
+    --surface-active: rgba(139, 92, 246, 0.25);
+    --border-color: rgba(139, 92, 246, 0.25);
+    --border-color-hover: rgba(139, 92, 246, 0.45);
+    --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.4),
+    0 0 45px rgba(109, 40, 217, 0.25);
 }
 
-.dark.theme-purple {
-  --gradient-primary: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #8b5cf6 100%);
-  --gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+/* === NOUVEAU THÈME 3: OCEAN (Bleu/Turquoise) === */
+.theme-ocean {
+    --color-primary: #0ea5e9;
+    --color-secondary: #14b8a6;
+    --color-tertiary: #06b6d4;
+    --color-accent: #0891b2;
 
-  --surface: rgb(139 92 246 / 0.15);
-  --surface-hover: rgb(139 92 246 / 0.22);
-  --surface-active: rgb(139 92 246 / 0.3);
-  --border-color: rgb(139 92 246 / 0.3);
-  --border-color-hover: rgb(139 92 246 / 0.5);
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
 
-  --background-secondary: #3f0f63;
-  --background-tertiary: #581c87;
-  --foreground-secondary: #d8b4fe;
-  --foreground-tertiary: #c4b5fd;
+    --surface: rgba(14, 165, 233, 0.12);
+    --surface-hover: rgba(14, 165, 233, 0.18);
+    --surface-active: rgba(20, 184, 166, 0.25);
+    --border-color: rgba(14, 165, 233, 0.25);
+    --border-color-hover: rgba(20, 184, 166, 0.45);
+    --shadow-glow: 0 0 25px rgba(14, 165, 233, 0.4),
+    0 0 45px rgba(20, 184, 166, 0.25);
 }
 
-@theme inline {
-  --font-sans: "Inter", "Inter Fallback";
-  --font-mono: "Fira Code", "Fira Code Fallback";
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+/* === NOUVEAU THÈME 4: SOLAR (Orange/Jaune) === */
+.theme-solar {
+    --color-primary: #f97316;
+    --color-secondary: #eab308;
+    --color-tertiary: #ea580c;
+    --color-accent: #d97706;
+
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+
+    --surface: rgba(249, 115, 22, 0.12);
+    --surface-hover: rgba(249, 115, 22, 0.18);
+    --surface-active: rgba(234, 179, 8, 0.25);
+    --border-color: rgba(249, 115, 22, 0.25);
+    --border-color-hover: rgba(234, 179, 8, 0.45);
+    --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.4),
+    0 0 45px rgba(234, 179, 8, 0.25);
 }
 
+/* === NOUVEAU THÈME 5: EMERALD (Vert/Citron) === */
+.theme-emerald {
+    --color-primary: #10b981;
+    --color-secondary: #84cc16;
+    --color-tertiary: #059669;
+    --color-accent: #65a30d;
+
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+
+    --surface: rgba(16, 185, 129, 0.12);
+    --surface-hover: rgba(16, 185, 129, 0.18);
+    --surface-active: rgba(132, 204, 22, 0.25);
+    --border-color: rgba(16, 185, 129, 0.25);
+    --border-color-hover: rgba(132, 204, 22, 0.45);
+    --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.4),
+    0 0 45px rgba(132, 204, 22, 0.25);
+}
+
+/* === NOUVEAU THÈME 6: CYBER (Cyan/Rose vif) === */
+.theme-cyber {
+    --color-primary: #06b6d4;
+    --color-secondary: #d946ef;
+    --color-tertiary: #0891b2;
+    --color-accent: #c026d3;
+
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+
+    --surface: rgba(6, 182, 212, 0.12);
+    --surface-hover: rgba(6, 182, 212, 0.18);
+    --surface-active: rgba(217, 70, 239, 0.25);
+    --border-color: rgba(6, 182, 212, 0.25);
+    --border-color-hover: rgba(217, 70, 239, 0.45);
+    --shadow-glow: 0 0 25px rgba(6, 182, 212, 0.4),
+    0 0 45px rgba(217, 70, 239, 0.25);
+}
+
+
+/* === THÈMES DE BASE (Déjà dans votre type) === */
+
+.theme-pink {
+    --color-primary: #ec4899;
+    --color-secondary: #f472b6;
+    --color-tertiary: #db2777;
+    --color-accent: #be185d;
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+    --surface: rgba(236, 72, 153, 0.12);
+    --surface-hover: rgba(236, 72, 153, 0.18);
+    --surface-active: rgba(236, 72, 153, 0.25);
+    --border-color: rgba(236, 72, 153, 0.25);
+    --border-color-hover: rgba(236, 72, 153, 0.45);
+    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4);
+}
+
+.theme-blue {
+    --color-primary: #3b82f6;
+    --color-secondary: #60a5fa;
+    --color-tertiary: #2563eb;
+    --color-accent: #1d4ed8;
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+    --surface: rgba(59, 130, 246, 0.12);
+    --surface-hover: rgba(59, 130, 246, 0.18);
+    --surface-active: rgba(59, 130, 246, 0.25);
+    --border-color: rgba(59, 130, 246, 0.25);
+    --border-color-hover: rgba(59, 130, 246, 0.45);
+    --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.4);
+}
+
+.theme-red {
+    --color-primary: #ef4444;
+    --color-secondary: #f87171;
+    --color-tertiary: #dc2626;
+    --color-accent: #b91c1c;
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+    --surface: rgba(239, 68, 68, 0.12);
+    --surface-hover: rgba(239, 68, 68, 0.18);
+    --surface-active: rgba(239, 68, 68, 0.25);
+    --border-color: rgba(239, 68, 68, 0.25);
+    --border-color-hover: rgba(239, 68, 68, 0.45);
+    --shadow-glow: 0 0 25px rgba(239, 68, 68, 0.4);
+}
+
+.theme-magenta {
+    --color-primary: #c026d3;
+    --color-secondary: #d946ef;
+    --color-tertiary: #a21caf;
+    --color-accent: #86198f;
+    --color-violet: var(--color-primary);
+    --color-rose: var(--color-secondary);
+    --color-magenta: var(--color-tertiary);
+    --color-indigo: var(--color-accent);
+    --surface: rgba(192, 38, 211, 0.12);
+    --surface-hover: rgba(192, 38, 211, 0.18);
+    --surface-active: rgba(192, 38, 211, 0.25);
+    --border-color: rgba(192, 38, 211, 0.25);
+    --border-color-hover: rgba(192, 38, 211, 0.45);
+    --shadow-glow: 0 0 25px rgba(192, 38, 211, 0.4);
+}
+
+
+/* === Mode sombre (Générique) === */
+.dark {
+    --background: #090014;
+    --foreground: #faf5ff;
+    --bg-gradient-stop-1: #1e1b4b;
+    --bg-gradient-stop-2: #31071a;
+
+    /* Le Glassmorphism en mode sombre peut rester générique ou être défini par thème */
+    /* Pour l'instant, je le laisse générique basé sur Gemini */
+    --surface: rgba(126, 34, 206, 0.15);
+    --surface-hover: rgba(236, 72, 153, 0.2);
+    --surface-active: rgba(236, 72, 153, 0.3);
+    --border-color: rgba(236, 72, 153, 0.3);
+    --border-color-hover: rgba(236, 72, 153, 0.5);
+}
+
+/* === Bases === */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    body {
+        @apply bg-[var(--background)] text-[var(--foreground)] transition-colors duration-500;
+        font-family: var(--font-sans);
+        background: radial-gradient(circle at 20% 30%, var(--bg-gradient-stop-1) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, var(--bg-gradient-stop-2) 0%, transparent 60%),
+        var(--background);
+        background-attachment: fixed;
+    }
+    * {
+        @apply border-[var(--border-color)] antialiased;
+    }
 }
 
-* {
-  @apply antialiased;
-}
-
-body {
-  @apply bg-background text-foreground transition-colors duration-500;
-  font-feature-settings: "rounding" 1;
-}
-
+/* === Components === */
 @layer components {
-  /* Enhanced glass morphism with better contrast in dark/light modes */
-  .glass {
-    @apply backdrop-blur-xl border rounded-2xl;
-    background-color: var(--surface);
-    border-color: var(--border-color);
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .glass-hover {
-    @apply backdrop-blur-xl border rounded-2xl;
-    background-color: var(--surface);
-    border-color: var(--border-color);
-    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .glass-hover:hover {
-    background-color: var(--surface-hover);
-    border-color: var(--border-color-hover);
-    transform: translateY(-2px);
-  }
-
-  /* New gradient text utility for cards */
-  .text-gradient {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Gradient button variant */
-  .btn-gradient {
-    background: var(--gradient-primary);
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .btn-gradient:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
-  }
+    /* Ces classes utilisent les variables génériques,
+       elles se mettront à jour automatiquement avec le thème. */
+    .glass {
+        @apply backdrop-blur-2xl border rounded-2xl;
+        background-color: var(--surface);
+        border-color: var(--border-color);
+        box-shadow: var(--shadow-glow);
+        transition: all 0.4s ease;
+    }
+    .glass:hover {
+        background-color: var(--surface-hover);
+        border-color: var(--border-color-hover);
+        transform: translateY(-2px);
+    }
+    .btn-gemini {
+        background: var(--gradient-primary);
+        color: white;
+        @apply px-4 py-2 rounded-xl font-semibold transition-all;
+        box-shadow: var(--shadow-glow); /* Ombre dynamique */
+    }
+    .btn-gemini:hover {
+        filter: brightness(1.15);
+        transform: translateY(-2px);
+    }
+    .text-gradient {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 }
 
-.glow-primary {
-  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
-}
-
-.glow-secondary {
-  box-shadow: 0 10px 25px -5px rgba(167, 139, 250, 0.3);
-}
-
-.glow-accent {
-  box-shadow: 0 15px 40px -5px var(--accent-primary);
-  filter: brightness(1.05);
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-slide-in {
-  animation: slide-in 0.5s ease-out;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #faf8ff;
-    --background-secondary: #f5f3ff;
-    --background-tertiary: #ede9fe;
-    --foreground: #1e1b4b;
-    --foreground-secondary: #6d28d9;
-    --foreground-tertiary: #7c3aed;
-
-    --surface: rgb(139 92 246 / 0.08);
-    --surface-hover: rgb(139 92 246 / 0.12);
-    --surface-active: rgb(139 92 246 / 0.16);
-    --border-color: rgb(139 92 246 / 0.2);
-    --border-color-hover: rgb(139 92 246 / 0.35);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+/* === Animations (inchangées) === */
+@keyframes aurora { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+.animate-aurora { background: var(--gradient-secondary); background-size: 200% 200%; animation: aurora 10s ease-in-out infinite; }
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+.animate-float { animation: float 6s ease-in-out infinite; }

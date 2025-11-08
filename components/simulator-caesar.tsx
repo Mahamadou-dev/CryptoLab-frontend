@@ -1,83 +1,187 @@
+// Fichier : components/simulator-caesar.tsx
+
 "use client"
 
 import { useState } from "react"
-import { caesarEncrypt, caesarDecrypt } from "@/lib/crypto/caesar"
-import { SimulatorPanel } from "./simulator-panel"
-import { SimulatorResult } from "./simulator-result"
+import { useSimulate, useCryptoAction } from "@/lib/api-hooks"
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Play } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Loader2, Zap, Lock, Unlock, Play } from "lucide-react"
 
+// ... (interface inchangée) ...
 interface SimulatorCaesarProps {
-  onResult?: (output: string) => void
+    setSimResult: (result: any) => void
+    setFinalOutput: (result: any) => void
+    clearResults: () => void
+    onSimulationStart: () => void
+    onSimulationEnd: (result: any, output: any) => void
+    isSimulating: boolean
 }
 
-export function SimulatorCaesar({ onResult }: SimulatorCaesarProps) {
-  const [input, setInput] = useState("")
-  const [shift, setShift] = useState(3)
-  const [output, setOutput] = useState("")
-  const [mode, setMode] = useState<"encrypt" | "decrypt">("encrypt")
+export function SimulatorCaesar({
+                                    setSimResult,
+                                    setFinalOutput,
+                                    clearResults,
+                                    onSimulationStart,
+                                    onSimulationEnd,
+                                    isSimulating,
+                                }: SimulatorCaesarProps) {
+    // ... (logique inchangée) ...
+    const [text, setText] = useState("Hello World")
+    const [shift, setShift] = useState("3")
 
-  const handleProcess = () => {
-    try {
-      const result = mode === "encrypt" ? caesarEncrypt(input, shift) : caesarDecrypt(input, shift)
-      setOutput(result)
-      onResult?.(result)
-    } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+    const { simulate, loading: simLoading, error: simError } = useSimulate()
+    const { execute, loading: actionLoading, error: actionError } = useCryptoAction()
+
+    const isLoading = isSimulating
+
+    const handleAction = async (action: "encrypt" | "decrypt") => {
+        clearResults()
+        onSimulationStart()
+        const shiftNum = parseInt(shift, 10)
+        if (isNaN(shiftNum)) {
+            alert("Le décalage doit être un nombre.")
+            onSimulationEnd(null, null)
+            return
+        }
+
+        let apiResponse = null
+        try {
+            const response = await execute("caesar", action, {
+                text: text,
+                shift: shiftNum,
+            })
+            apiResponse = response
+
+            if (action === 'encrypt') {
+                setText(response.cipher)
+            } else {
+                setText(response.plain)
+            }
+
+        } catch (error) {
+            console.error(error)
+        }
+        onSimulationEnd(null, apiResponse)
     }
-  }
 
-  return (
-    <>
-      <SimulatorPanel title="Input Text">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="w-full rounded-xl p-3 text-foreground placeholder-foreground-tertiary focus:outline-none border-2"
-          style={{ backgroundColor: "var(--background-secondary)", borderColor: "var(--border-color)" }}
-          rows={6}
-          placeholder="Enter text to process..."
-          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--accent-primary)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--border-color)")}
-        />
-      </SimulatorPanel>
+    const handleSimulate = async () => {
+        clearResults()
+        onSimulationStart()
+        const shiftNum = parseInt(shift, 10)
+        if (isNaN(shiftNum)) {
+            alert("Le décalage doit être un nombre.")
+            onSimulationEnd(null, null)
+            return
+        }
 
-      <SimulatorPanel title={`Shift: ${shift}`}>
-        <Slider value={[shift]} onValueChange={(val) => setShift(val[0])} min={0} max={25} step={1} className="mb-3" />
-        <p className="text-xs text-foreground-tertiary">Adjust the shift value (0-25)</p>
-      </SimulatorPanel>
+        let simResponse = null
+        let encryptResponse = null
+        try {
+            const apiData = { text: text, shift: shiftNum }
 
-      <div
-        className="glass p-6 rounded-2xl space-y-3"
-        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border-color)" }}
-      >
-        <Button
-          onClick={() => {
-            setMode("encrypt")
-            handleProcess()
-          }}
-          className="w-full bg-gradient-to-r from-accent-primary to-accent-tertiary hover:opacity-90 text-white rounded-xl"
-        >
-          <Play className="w-4 h-4 mr-2" />
-          Encrypt
-        </Button>
-        <Button
-          onClick={() => {
-            setMode("decrypt")
-            handleProcess()
-          }}
-          variant="outline"
-          className="w-full glass border-accent-secondary rounded-xl bg-transparent border-2"
-          style={{ borderColor: "var(--accent-secondary)", backgroundColor: "var(--surface)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--surface)")}
-        >
-          Decrypt
-        </Button>
-      </div>
+            const [simData, encryptData] = await Promise.all([
+                simulate("caesar", apiData),
+                execute("caesar", "encrypt", apiData)
+            ]);
 
-      <SimulatorResult output={output} title={`${mode === "encrypt" ? "Encrypted" : "Decrypted"} Text`} />
-    </>
-  )
+            simResponse = simData
+            encryptResponse = encryptData
+            setText(encryptData.cipher)
+
+        } catch (error) {
+            console.error(error)
+        }
+        onSimulationEnd(simResponse, encryptResponse)
+    }
+
+    const error = simError || actionError
+
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="caesar-text">Texte</Label>
+                    {/* REMARQUE : Style .glass appliqué */}
+                    <Textarea
+                        id="caesar-text"
+                        placeholder="Entrez votre texte..."
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        className="glass min-h-[100px]"
+                        disabled={isLoading}
+                    />
+                </div>
+                <div className="space-y-2 md:col-span-1">
+                    <Label htmlFor="caesar-shift">Décalage (Shift)</Label>
+                    {/* REMARQUE : Style .glass appliqué */}
+                    <Input
+                        id="caesar-shift"
+                        type="number"
+                        placeholder="3"
+                        value={shift}
+                        onChange={(e) => setShift(e.target.value)}
+                        disabled={isLoading}
+                        className="glass h-[100px] text-3xl text-center"
+                    />
+                </div>
+            </div>
+
+            {/* --- BOUTONS --- */}
+            <div className="flex flex-col sm:flex-row gap-2">
+                {/* REMARQUE : Utilisation de .btn-gemini */}
+                <Button
+                    onClick={() => handleAction("encrypt")}
+                    disabled={isLoading}
+                    className="btn-gemini flex-1 gap-2"
+                >
+                    {actionLoading && isSimulating ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Lock className="w-4 h-4" />
+                    )}
+                    Chiffrer
+                </Button>
+                {/* REMARQUE : Utilisation de .glass pour le bouton secondaire */}
+                <Button
+                    onClick={() => handleAction("decrypt")}
+                    disabled={isLoading}
+                    className="glass rounded-lg flex-1 gap-2"
+                    variant="outline"
+                >
+                    {actionLoading && isSimulating ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Unlock className="w-4 h-4" />
+                    )}
+                    Déchiffrer
+                </Button>
+            </div>
+
+            {/* REMARQUE : Bouton de simulation avec la couleur d'accent secondaire (magenta) */}
+            <Button
+                onClick={handleSimulate}
+                disabled={isLoading}
+                className="w-full gap-2 text-white bg-[var(--color-magenta)] hover:bg-[var(--color-magenta)]/80"
+            >
+                {simLoading && isSimulating ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Play className="w-4 h-4" />
+                )}
+                Lancer la Simulation 3D
+            </Button>
+
+            {/* REMARQUE : Alerte d'erreur stylisée */}
+            {error && (
+                <Alert variant="destructive" className="glass border-[var(--color-rose)]/50 text-[var(--color-rose)]">
+                    <AlertTitle>Erreur de l'API</AlertTitle>
+                    <AlertDescription className="break-all">{`${error}`}</AlertDescription>
+                </Alert>
+            )}
+        </div>
+    )
 }

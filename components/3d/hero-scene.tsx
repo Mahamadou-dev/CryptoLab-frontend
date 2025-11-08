@@ -3,80 +3,91 @@
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
 
+const COLORS = {
+    violet: new THREE.Color("#7e22ce"),
+    rose: new THREE.Color("#ec4899"),
+    magenta: new THREE.Color("#c026d3"),
+    background: new THREE.Color("#0b0013"),
+}
+
 export function HeroScene() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const animationIdRef = useRef<number | null>(null)
 
-  useEffect(() => {
-    if (!containerRef.current) return
+    useEffect(() => {
+        if (!containerRef.current) return
 
-    // Scene setup
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+        const container = containerRef.current
+        const scene = new THREE.Scene()
+        scene.background = COLORS.background
 
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.setClearColor(0x000000, 0)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    containerRef.current.appendChild(renderer.domElement)
-    rendererRef.current = renderer
+        const camera = new THREE.PerspectiveCamera(70, container.clientWidth / container.clientHeight, 0.1, 100)
+        camera.position.z = 5
 
-    camera.position.z = 5
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+        renderer.setSize(container.clientWidth, container.clientHeight)
+        renderer.setPixelRatio(window.devicePixelRatio)
+        container.appendChild(renderer.domElement)
 
-    // Create gradient mesh
-    const geometry = new THREE.IcosahedronGeometry(2, 8)
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xb8336a,
-      emissive: 0x6b1b40,
-      wireframe: false,
-      shininess: 100,
-    })
-    const mesh = new THREE.Mesh(geometry, material)
-    scene.add(mesh)
+        const ambient = new THREE.AmbientLight(COLORS.violet, 0.5)
+        const pointLight = new THREE.PointLight(COLORS.rose, 2, 10)
+        pointLight.position.set(2, 3, 3)
+        scene.add(ambient, pointLight)
 
-    // Lighting
-    const light1 = new THREE.PointLight(0x00d9ff, 1.5)
-    light1.position.set(5, 5, 5)
-    scene.add(light1)
+        // 💎 Sphère principale
+        const geometry = new THREE.SphereGeometry(1, 64, 64)
+        const material = new THREE.MeshStandardMaterial({
+            color: COLORS.violet,
+            emissive: COLORS.magenta,
+            emissiveIntensity: 0.8,
+            metalness: 0.9,
+            roughness: 0.2,
+        })
+        const sphere = new THREE.Mesh(geometry, material)
+        scene.add(sphere)
 
-    const light2 = new THREE.PointLight(0xff006e, 1)
-    light2.position.set(-5, -5, 5)
-    scene.add(light2)
+        // 🌌 Particules flottantes
+        const particlesGeometry = new THREE.BufferGeometry()
+        const particleCount = 300
+        const positions = new Float32Array(particleCount * 3)
+        for (let i = 0; i < particleCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 10
+        }
+        particlesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: COLORS.rose,
+            size: 0.04,
+            transparent: true,
+            opacity: 0.8,
+        })
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial)
+        scene.add(particles)
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
-    scene.add(ambientLight)
+        const clock = new THREE.Clock()
+        const animate = () => {
+            const elapsed = clock.getElapsedTime()
+            sphere.rotation.y = elapsed * 0.2
+            sphere.rotation.x = Math.sin(elapsed * 0.1) * 0.2
+            particles.rotation.y = elapsed * 0.05
+            renderer.render(scene, camera)
+            animationIdRef.current = requestAnimationFrame(animate)
+        }
+        animate()
 
-    // Animation loop
-    let animationId: number
-    const animate = () => {
-      animationId = requestAnimationFrame(animate)
-      mesh.rotation.x += 0.001
-      mesh.rotation.y += 0.002
-      renderer.render(scene, camera)
-    }
+        const handleResize = () => {
+            camera.aspect = container.clientWidth / container.clientHeight
+            camera.updateProjectionMatrix()
+            renderer.setSize(container.clientWidth, container.clientHeight)
+        }
+        window.addEventListener("resize", handleResize)
 
-    animate()
+        return () => {
+            cancelAnimationFrame(animationIdRef.current!)
+            window.removeEventListener("resize", handleResize)
+            renderer.dispose()
+            container.removeChild(renderer.domElement)
+        }
+    }, [])
 
-    // Handle resize
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(window.innerWidth, window.innerHeight)
-    }
-
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationId)
-      if (containerRef.current?.contains(renderer.domElement)) {
-        containerRef.current.removeChild(renderer.domElement)
-      }
-      geometry.dispose()
-      material.dispose()
-      renderer.dispose()
-    }
-  }, [])
-
-  return <div ref={containerRef} className="absolute inset-0" />
+    return <div ref={containerRef} className="w-full h-full animate-aurora" />
 }
