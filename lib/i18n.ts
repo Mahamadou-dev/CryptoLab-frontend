@@ -65,6 +65,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "footer.connect": "Connect",
         "footer.follow": "Follow us for updates",
         "footer.rights": "All rights reserved.",
+        "footer.by":"Made with ❤️ by" ,
 
         // General
         "difficulty.beginner": "Beginner",
@@ -117,6 +118,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "about.view-github": "View on GitHub",
         "about.made-with": "Made with",
         "about.for-crypto": "for the crypto community.",
+        "about.by":"By",
 
         // Report
         "report.title": "Report an Issue",
@@ -381,6 +383,7 @@ export const translations: Record<Language, Record<string, string>> = {
         "footer.connect": "Connexion",
         "footer.follow": "Suivez-nous pour les mises à jour",
         "footer.rights": "Tous droits réservés.",
+        "footer.by":"Construit avec ❤️ par" ,
 
         // General
         "difficulty.beginner": "Débutant",
@@ -432,7 +435,8 @@ export const translations: Record<Language, Record<string, string>> = {
         "about.open-source-desc": "Ce projet est construit par et pour la communauté. Contribuez, signalez des bugs ou explorez le code source sur GitHub.",
         "about.view-github": "Voir sur GitHub",
         "about.made-with": "Fait avec",
-        "about.for-crypto": "pour la communauté crypto.",
+        "about.for-crypto": "pour la communauté crypto. ",
+        "about.by":"Par",
 
         // Report
         "report.title": "Signaler un Problème",

@@ -245,6 +245,7 @@ export default function AboutPage() {
                         {t("about.made-with", "Fait avec")} <Heart className="w-4 h-4 text-[var(--color-rose)]" />{" "}
                         {t("about.for-crypto", "pour la communauté crypto.")}
                     </p>
+                    <p> {t("about.by")} <a href='https://gremah.vercel.app' target='_blank' className="text-gradient" >GremahTech</a></p>
                 </div>
             </div>
         </main>

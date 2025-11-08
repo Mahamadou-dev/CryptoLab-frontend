@@ -412,6 +412,7 @@ export default function Home() {
                         className="text-center text-sm text-foreground-tertiary pt-8 border-t border-[var(--border-color)]"
                     >
                         © {new Date().getFullYear()} CryptoLab. {t("footer.rights", "Tous droits réservés.")}
+                        <p> {t("footer.by")} <a href='https://gremah.vercel.app' target='_blank' className="text-gradient" >GremahTech</a></p>
                     </div>
                 </div>
             </footer>
