@@ -6,31 +6,50 @@ import { useTranslation } from "@/lib/i18n"
 import { Moon, Sun, Globe, Palette } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react" // 1. Importer useState et useEffect
+import { useState, useEffect } from "react"
 
 export function ThemeLanguageSwitcher() {
+    // 1. Déclare le type ColorTheme pour correspondre au contexte
+    type ColorTheme =
+        | "gemini"
+        | "purple"
+        | "ocean"
+        | "solar"
+        | "emerald"
+        | "cyber"
+        | "pink"
+        | "blue"
+        | "red"
+        | "magenta"
+
     const { theme, setTheme, colorTheme, setColorTheme } = useTheme()
     const { language, setLanguage } = useLanguage()
     const t = useTranslation(language)
 
-    // 2. Ajout d'un état pour s'assurer que le composant est "monté"
     const [isMounted, setIsMounted] = useState(false)
 
-    // 3. useEffect ne s'exécute que côté client
     useEffect(() => {
         setIsMounted(true)
     }, [])
 
-    const colorOptions = [
-        { value: "purple" as const, label: t("color.purple", "Purple") },
-        { value: "red" as const, label: t("color.red", "Red") },
-        { value: "blue" as const, label: t("color.blue", "Blue") },
-        { value: "pink" as const, label: t("color.pink", "Pink") },
+    // 2. --- CORRECTION ---
+    //    Liste complète de tous les thèmes de couleurs
+    const colorOptions: { value: ColorTheme; label: string }[] = [
+        { value: "gemini", label: t("color.gemini", "Gemini") },
+        { value: "purple", label: t("color.purple", "Purple") },
+        { value: "ocean", label: t("color.ocean", "Ocean") },
+        { value: "solar", label: t("color.solar", "Solar") },
+        { value: "emerald", label: t("color.emerald", "Emerald") },
+        { value: "cyber", label: t("color.cyber", "Cyber") },
+        { value: "pink", label: t("color.pink", "Pink") },
+        { value: "blue", label: t("color.blue", "Blue") },
+        { value: "red", label: t("color.red", "Red") },
+        { value: "magenta", label: t("color.magenta", "Magenta") },
     ]
 
     return (
         <div className="flex items-center gap-2">
-            {/* Color Theme Switcher (inchangé) */}
+            {/* Color Theme Switcher (Maintenant complet) */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
@@ -47,6 +66,7 @@ export function ThemeLanguageSwitcher() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    {/* 3. Le map() fonctionne maintenant avec la liste complète */}
                     {colorOptions.map((option) => (
                         <DropdownMenuItem
                             key={option.value}
@@ -72,17 +92,14 @@ export function ThemeLanguageSwitcher() {
                         }}
                         aria-label="Toggle theme"
                     >
-                        {/* 4. Logique de rendu corrigée */}
+                        {/* Logique de rendu corrigée pour éviter l'erreur d'hydratation */}
                         {!isMounted ? (
-                            // Rendu par défaut (identique serveur et client)
-                            <Sun className="w-4 h-4" />
+                            <Sun className="w-4 h-4" /> // Rendu par défaut
                         ) : theme === "dark" ||
                         (theme === "system" &&
                             window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
-                            // Rendu après montage côté client
                             <Moon className="w-4 h-4" />
                         ) : (
-                            // Rendu après montage côté client
                             <Sun className="w-4 h-4" />
                         )}
                     </Button>
