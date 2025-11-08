@@ -18,7 +18,7 @@ C'est un outil pensé pour les étudiants, les développeurs curieux et les pass
 
 🚀 Démo Live
 
-Frontend (Next.js) : https://v0-crypto-labfrontend-mu.vercel.app/ 
+Frontend (Next.js) : https://cryptolab.vercel.app/ 
 
 Backend (API Docs) : https://cryptolab-api.onrender.com/docs
 
