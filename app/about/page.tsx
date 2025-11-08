@@ -127,7 +127,7 @@ export default function AboutPage() {
                                 variant="ghost"
                                 className="text-[var(--color-rose)] hover:text-[var(--color-rose)] hover:bg-[var(--surface-hover)]"
                             >
-                                <a href="https://github.com/votre-repo-ici" target="_blank" className="inline-flex items-center gap-2">
+                                <a href="https://github.com/Mahamadou-dev/CryptoLab-backend.git" target="_blank" className="inline-flex items-center gap-2">
                                     <Github className="w-5 h-5" />
                                     {t("about.view-github", "Voir sur GitHub")}
                                 </a>
