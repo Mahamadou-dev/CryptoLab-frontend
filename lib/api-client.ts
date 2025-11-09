@@ -85,8 +85,17 @@ export class CryptoAPIClient {
     /**
      * Helper pour les requêtes POST
      */
+    /**
+     * Helper pour les requêtes POST
+     */
     private async post(endpoint: string, body: any): Promise<any> {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        // --- CORRECTION ---
+        // Construit une URL propre, en s'assurant qu'il n'y a pas de double slash
+        const url = `${this.baseUrl.replace(/\/$/, "")}${endpoint}`;
+        // .replace(/\/$/, "") supprime le / final de baseUrl, s'il existe.
+
+        const response = await fetch(url, { // Utilise l'URL nettoyée
+            // --- FIN CORRECTION ---
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -107,7 +116,12 @@ export class CryptoAPIClient {
      * Helper pour les requêtes GET
      */
     private async get(endpoint: string): Promise<any> {
-        const response = await fetch(`${this.baseUrl}${endpoint}`)
+        // --- CORRECTION (identique) ---
+        const url = `${this.baseUrl.replace(/\/$/, "")}${endpoint}`;
+
+        const response = await fetch(url) // Utilise l'URL nettoyée
+        // --- FIN CORRECTION ---
+
         if (!response.ok) {
             const errData = await response.json()
             throw new ApiError(
@@ -117,10 +131,7 @@ export class CryptoAPIClient {
             )
         }
         return response.json()
-    }
-
-    // --- Méthodes "Classical" ---
-    async caesarEncrypt(data: CaesarInput) {
+    }    async caesarEncrypt(data: CaesarInput) {
         return this.post("/api/classical/caesar/encrypt", data)
     }
     async vigenereEncrypt(data: KeyTextInput) {
