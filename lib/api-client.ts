@@ -1,8 +1,7 @@
 // Fichier: lib/api-client.ts
 
 // 1. DÉFINIR L'URL DE BASE
-// Ton fichier .env.local doit contenir :
-// NEXT_PUBLIC_API_URL=https://cryptolab-api.onrender.com
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 // --- Interfaces Pydantic (correspondent au backend) ---
