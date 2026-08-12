@@ -140,8 +140,23 @@ export class CryptoAPIClient {
     async playfairEncrypt(data: KeyTextInput) {
         return this.post("/api/classical/playfair/encrypt", data)
     }
+    /**
+     * Rail Fence : le vrai chiffre en zigzag.
+     * `shift` est le nombre de rails. Espaces et ponctuation sont conservés,
+     * et l'aller-retour est exact.
+     */
     async railfenceEncrypt(data: CaesarInput) {
         return this.post("/api/classical/railfence/encrypt", data)
+    }
+    /**
+     * Transposition par colonnes : l'algorithme que la route `/railfence`
+     * implémentait réellement avant la v2. Il a désormais son propre nom.
+     */
+    async columnarEncrypt(data: KeyTextInput) {
+        return this.post("/api/classical/columnar/encrypt", data)
+    }
+    async columnarDecrypt(data: KeyTextInput) {
+        return this.post("/api/classical/columnar/decrypt", data)
     }
 
     async caesarDecrypt(data: CaesarInput) {

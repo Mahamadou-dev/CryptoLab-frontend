@@ -1,0 +1,119 @@
+name: Deploy
+
+# Deploiement Vercel pilote par GitHub Actions, et non par l'integration Git de
+# Vercel. Cela garantit qu'aucun build rouge ne part en production.
+#
+# A faire une fois dans Vercel : Settings > Git > desactiver
+# "Automatic deployments from Git", sinon Vercel deploierait en parallele sans
+# attendre la CI.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    name: Deployer en production
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL || 'https://cryptolaboratory.vercel.app' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verifier que les secrets Vercel existent
+        run: |
+          missing=""
+          [ -z "${{ secrets.VERCEL_TOKEN }}" ] && missing="$missing VERCEL_TOKEN"
+          [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && missing="$missing VERCEL_ORG_ID"
+          [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Secrets manquants :$missing"
+            echo "Les recuperer avec 'npx vercel link' puis dans .vercel/project.json,"
+            echo "et le token dans Vercel > Account Settings > Tokens."
+            exit 1
+          fi
+
+      - name: Installer la CLI Vercel
+        run: npm install --global vercel@latest
+
+      - name: Recuperer la configuration de production
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Construire
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deployer
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deploye sur $url"
+
+      - name: Verifier que le site repond
+        run: |
+          for attempt in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deploy.outputs.url }}")
+            if [ "$code" = "200" ]; then
+              echo "Le site repond 200."
+              exit 0
+            fi
+            echo "  tentative $attempt/10 : code $code"
+            sleep 10
+          done
+          echo "::error::Le site ne repond pas 200 apres le deploiement."
+          exit 1
+
+      - name: Resume
+        if: always()
+        run: |
+          {
+            echo "### Deploiement frontend"
+            echo ""
+            echo "- Commit : \`${{ github.sha }}\`"
+            echo "- URL : ${{ steps.deploy.outputs.url }}"
+            echo "- Resultat : ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  preview:
+    name: Deploiement de previsualisation
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installer la CLI Vercel
+        run: npm install --global vercel@latest
+
+      - name: Construire et deployer la previsualisation
+        run: |
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Previsualisation : $url" >> "$GITHUB_STEP_SUMMARY"
