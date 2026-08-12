@@ -83,5 +83,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Mahamadou-dev/CryptoLab-frontend.git"
-  }
+  },
+  "packageManager": "pnpm@10.20.0"
 }
