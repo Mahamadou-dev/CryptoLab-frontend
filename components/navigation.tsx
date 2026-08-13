@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeLanguageSwitcher } from "@/components/theme-language-switcher"
+import { UserMenu } from "@/components/auth/user-menu"
 import { useLanguage } from "@/lib/language-context"
 import { useTranslation } from "@/lib/i18n"
 
@@ -72,6 +73,7 @@ export function Navigation() {
                         Labs
                     </Link>
                     <ThemeLanguageSwitcher />
+                    <UserMenu />
                 </div>
             </div>
         </nav>

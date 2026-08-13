@@ -18,6 +18,9 @@ yarn-error.log*
 
 # env files
 .env*
+# ...sauf le modele, qui ne contient aucune valeur reelle et sert de
+# documentation des variables attendues.
+!.env.example
 
 # vercel
 .vercel

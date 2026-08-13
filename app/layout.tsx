@@ -2,6 +2,7 @@ import type React from "react"
 import { Inter, Fira_Code } from "next/font/google"
 import { ThemeProvider } from "@/lib/theme-context"
 import { LanguageProvider } from "@/lib/language-context"
+import { AuthProvider } from "@/lib/auth-context"
 import { AccessibilitySkipLink } from "@/components/accessibility-skip-link"
 import "./globals.css"
 import {ScrollToTopButton} from "@/components/sroll-to-top-button";
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body className={`${inter.variable} ${firaCode.variable} font-sans`}>
         <ThemeProvider>
           <LanguageProvider>
-            <AccessibilitySkipLink />
-            {children}
+            <AuthProvider>
+              <AccessibilitySkipLink />
+              {children}
               <ScrollToTopButton />
+            </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>
       </body>

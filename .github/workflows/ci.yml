@@ -10,9 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Aucun job n'ecrit dans le depot.
+permissions:
+  contents: read
+
 jobs:
-  build:
-    name: Typecheck & build
+  quality:
+    name: Lint & typecheck
     runs-on: ubuntu-latest
 
     steps:
@@ -29,10 +33,79 @@ jobs:
       - name: Installer les dependances
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        # Bloquant sur les erreurs. Les avertissements restants proviennent du
+        # code anterieur a la v2 et sont geles par eslint.config.mjs : le code
+        # neuf, lui, est tenu au niveau strict.
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm typecheck
 
+  build:
+    name: Build de production
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Installer les dependances
+        run: pnpm install --frozen-lockfile
+
       - name: Build
         env:
+          # Valeur factice : le build ne fait aucun appel reseau, mais l'URL est
+          # figee dans le bundle et doit donc etre definie.
           NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
         run: pnpm build
+
+  security:
+    name: Secrets & dependances
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Verifier qu'aucun fichier d'environnement n'est suivi
+        run: |
+          tracked=$(git ls-files | grep -E '^\.env(\.|$)' | grep -v '\.env\.example' || true)
+          if [ -n "$tracked" ]; then
+            echo "::error::Fichiers d'environnement suivis par git : $tracked"
+            exit 1
+          fi
+          echo "OK : aucun fichier .env suivi."
+
+      - name: Verifier qu'aucun fichier .idea n'est suivi
+        run: |
+          if git ls-files | grep -q '^\.idea/'; then
+            echo "::error::Des fichiers .idea/ sont suivis par git."
+            exit 1
+          fi
+          echo "OK : aucun fichier .idea suivi."
+
+      - name: Chercher une chaine de connexion committee
+        run: |
+          if git grep -nIE 'mongodb(\+srv)?://[^ "'"'"'<]*:[^ "'"'"'<@]+@' -- . ':!.github/workflows/*' ; then
+            echo "::error::Une chaine de connexion MongoDB avec mot de passe est presente dans le depot."
+            exit 1
+          fi
+          echo "OK : aucune chaine de connexion avec identifiants."
+
+      - name: Installer les dependances
+        run: pnpm install --frozen-lockfile
+
+      - name: Vulnerabilites connues des dependances
+        # Bloque sur les failles hautes et critiques. En dessous, on signale sans
+        # arreter la chaine : un avis « low » sur un outil de build ne justifie
+        # pas de bloquer un deploiement.
+        run: pnpm audit --audit-level high --prod

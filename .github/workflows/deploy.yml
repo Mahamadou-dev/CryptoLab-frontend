@@ -17,6 +17,11 @@ concurrency:
   group: deploy-frontend
   cancel-in-progress: false
 
+# Lecture seule : le deploiement passe par la CLI Vercel et son propre jeton,
+# jamais par le jeton GitHub.
+permissions:
+  contents: read
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

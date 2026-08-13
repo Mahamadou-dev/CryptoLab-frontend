@@ -5,10 +5,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion, Variants } from "framer-motion"
 import {
-    ArrowRight, Sparkles, BookOpen, Zap, Eye, ChevronDown,
+    ArrowRight, BookOpen, Zap, Eye,
     Smartphone, CreditCard, Share2, ShieldCheck
 } from "lucide-react"
-import { HeroScene } from "@/components/3d/hero-scene"
+import { Hero } from "@/components/landing/hero"
 import { Navigation } from "@/components/navigation"
 import { useLanguage } from "@/lib/language-context"
 import { useTranslation } from "@/lib/i18n"
@@ -54,66 +54,7 @@ export default function Home() {
         >
             <Navigation />
 
-            {/* Section Hero */}
-            <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
-                {/* Arrière-plan 3D assombri */}
-                <div className="absolute inset-0 opacity-25 dark:opacity-35">
-                    <HeroScene />
-                </div>
-
-                {/* Dégradé de fond pour lisibilité */}
-                {/* REMARQUE : Utilisation de var(--background) pour une transition parfaite */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--background)]/60 to-[var(--background)] pointer-events-none" />
-
-                <motion.div
-                    className="relative z-10 flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7 }}
-                >
-                    {/* REMARQUE : Utilisation de la classe .glass */}
-                    <div className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-full glass">
-                        {/* REMARQUE : Utilisation de var(--color-rose) comme couleur d'accent */}
-                        <Sparkles className="w-4 h-4 text-[var(--color-rose)]" />
-                        <span className="text-sm text-foreground-secondary">
-                            {t("hero.badge", "La cryptographie enfin accessible")}
-                        </span>
-                    </div>
-
-                    {/* REMARQUE : Utilisation de la classe .text-gradient */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 text-gradient">
-                        CryptoLab
-                    </h1>
-
-                    <p className="text-lg sm:text-xl text-foreground-secondary mb-8 max-w-2xl">
-                        {t("hero.description", "Le laboratoire interactif pour comprendre et maîtriser la cryptographie.")}
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/simulations">
-                            {/* REMARQUE : Utilisation de la classe .btn-gemini */}
-                            <Button className="btn-gemini flex items-center">
-                                <Zap className="w-5 h-5 mr-2" /> Lancer le Laboratoire
-                            </Button>
-                        </Link>
-                        <Link href="/learn">
-                            {/* REMARQUE : Utilisation de .glass, en forçant le rounded-xl pour cohérer avec .btn-gemini */}
-                            <Button variant="outline" className="glass rounded-xl flex items-center text-[var(--foreground)] backdrop-blur-md">
-                                <BookOpen className="w-5 h-5 mr-2" /> Commencer le Cours
-                            </Button>
-                        </Link>
-                    </div>
-                </motion.div>
-
-                {/* Indicateur de scroll */}
-                <motion.div
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                    <ChevronDown className="w-6 h-6 text-foreground-tertiary" />
-                </motion.div>
-            </section>
+            <Hero />
 
 
             {/* --- SECTION "PONT" (Comment ça marche ?) --- */}
