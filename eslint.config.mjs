@@ -30,6 +30,9 @@ const V2_PATHS = [
     "lib/auth-server.ts",
     "lib/auth-context.tsx",
     "lib/safe-redirect.ts",
+    // Les tests sont du code v2 : un `any` ou un import mort y passerait
+    // inapercu alors qu'ils sont la preuve du reste.
+    "tests/**/*.{ts,tsx}",
 ]
 
 /** Regles ramenees a « avertissement » sur le code anterieur a la v2. */
