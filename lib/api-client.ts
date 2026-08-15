@@ -57,19 +57,115 @@ export interface RsaDecryptInput {
     private_key: string
 }
 
-/**
- * Gère les erreurs de l'API FastAPI
- */
-class ApiError extends Error {
-    status: number
-    detail: any
+// --- /api/algorithms (catalogue servi par le registre) ---
 
-    constructor(message: string, status: number, detail: any) {
+/** Ce qu'on a le droit de faire d'un algorithme, porté par la donnée. */
+export type Maturity = "current" | "broken" | "educational"
+
+export interface AlgorithmOperation {
+    name: string
+    method: string
+    path: string
+    summary: string
+    /** Schéma JSON de l'entrée : de quoi construire un formulaire sans rien coder. */
+    schema: Record<string, any> | null
+}
+
+export interface TestVector {
+    operation: string
+    inputs: Record<string, unknown>
+    expected: Record<string, unknown>
+    /** « NIST FIPS 180-4, exemple B.1 », « RFC 3602 §4 »… */
+    source: string
+}
+
+export interface AlgorithmSummary {
+    slug: string
+    name: string
+    family: string
+    family_label: string
+    summary: string
+    maturity: Maturity
+    difficulty: number
+    year: number | null
+    simulator: string | null
+    aliases: string[]
+    /** Nombre de vecteurs officiels rejoués par la CI à chaque commit. */
+    vector_count: number
+    vector_sources: string[]
+    operations: AlgorithmOperation[]
+}
+
+export interface AlgorithmCatalog {
+    count: number
+    total_vectors: number
+    families: { value: string; label: string; prefix: string }[]
+    algorithms: AlgorithmSummary[]
+}
+
+/**
+ * Enveloppe de réponse de l'API (phase 2).
+ *
+ * Toute route d'algorithme répond `{ok, data, error}`, et le code HTTP porte la
+ * même information que `ok`. Auparavant, un échec de déchiffrement arrivait en
+ * `200 OK` avec la chaîne « Erreur: … » dans le champ résultat : il fallait la
+ * renifler, et un texte déchiffré contenant ce mot cassait le contrat.
+ */
+export interface ApiEnvelope<T> {
+    ok: boolean
+    data: T | null
+    error: { code: string; message: string; details?: Record<string, unknown> } | null
+}
+
+/**
+ * Erreur de l'API, portant le code métier stable en plus du statut HTTP.
+ *
+ * `code` vaut `decryption_failed`, `invalid_key`, `validation_error`… — c'est
+ * lui qu'il faut tester, jamais le message, qui est traduisible.
+ */
+export class ApiError extends Error {
+    readonly status: number
+    readonly code: string
+    readonly details: Record<string, unknown>
+
+    constructor(message: string, status: number, code: string, details: Record<string, unknown> = {}) {
         super(message)
         this.name = "ApiError"
         this.status = status
-        this.detail = detail
+        this.code = code
+        this.details = details
     }
+}
+
+/**
+ * Déballe une réponse : rend `data`, ou lève une `ApiError`.
+ *
+ * Tolère une réponse hors enveloppe pour ne pas casser sur une erreur émise par
+ * l'infrastructure (502 d'un proxy, page d'erreur d'hébergeur) — qui n'a aucune
+ * raison de connaître notre format.
+ */
+async function unwrap<T>(response: Response): Promise<T> {
+    let body: unknown = null
+    try {
+        body = await response.json()
+    } catch {
+        // Corps vide ou non JSON : le statut suffit à décider.
+    }
+
+    const envelope = body as Partial<ApiEnvelope<T>> | null
+
+    if (!response.ok || envelope?.ok === false) {
+        const error = envelope?.error
+        throw new ApiError(
+            error?.message ?? `Le service a répondu ${response.status}.`,
+            response.status,
+            error?.code ?? "http_error",
+            error?.details ?? {},
+        )
+    }
+
+    // Réponse enveloppée : on rend le contenu. Sinon on rend le corps tel quel.
+    return (envelope && "data" in envelope ? envelope.data : body) as T
 }
 
 /**
@@ -82,56 +178,42 @@ export class CryptoAPIClient {
         this.baseUrl = baseUrl
     }
 
-    /**
-     * Helper pour les requêtes POST
-     */
-    /**
-     * Helper pour les requêtes POST
-     */
-    private async post(endpoint: string, body: any): Promise<any> {
-        // --- CORRECTION ---
-        // Construit une URL propre, en s'assurant qu'il n'y a pas de double slash
-        const url = `${this.baseUrl.replace(/\/$/, "")}${endpoint}`;
-        // .replace(/\/$/, "") supprime le / final de baseUrl, s'il existe.
+    /** Construit une URL propre, sans double barre oblique. */
+    private url(endpoint: string): string {
+        return `${this.baseUrl.replace(/\/$/, "")}${endpoint}`
+    }
 
-        const response = await fetch(url, { // Utilise l'URL nettoyée
-            // --- FIN CORRECTION ---
+    private async post<T = any>(endpoint: string, body: unknown): Promise<T> {
+        const response = await fetch(this.url(endpoint), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
         })
-
-        if (!response.ok) {
-            const errData = await response.json()
-            throw new ApiError(
-                `API Error: ${response.statusText}`,
-                response.status,
-                errData.detail || "Unknown error",
-            )
-        }
-        return response.json()
+        return unwrap<T>(response)
     }
 
+    private async get<T = any>(endpoint: string): Promise<T> {
+        return unwrap<T>(await fetch(this.url(endpoint)))
+    }
+
+    // --- Catalogue ---
     /**
-     * Helper pour les requêtes GET
+     * Le catalogue servi par l'API : le frontend découvre ce que le backend
+     * sait faire au lieu de le coder en dur. Un algorithme ajouté au registre
+     * apparaît ici sans qu'une ligne de TypeScript ne change.
      */
-    private async get(endpoint: string): Promise<any> {
-        // --- CORRECTION (identique) ---
-        const url = `${this.baseUrl.replace(/\/$/, "")}${endpoint}`;
+    async listAlgorithms(params: { family?: string; q?: string } = {}) {
+        const query = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][],
+        ).toString()
+        return this.get<AlgorithmCatalog>(`/api/algorithms${query ? `?${query}` : ""}`)
+    }
 
-        const response = await fetch(url) // Utilise l'URL nettoyée
-        // --- FIN CORRECTION ---
+    async getAlgorithm(slug: string) {
+        return this.get<AlgorithmSummary & { vectors: TestVector[] }>(`/api/algorithms/${slug}`)
+    }
 
-        if (!response.ok) {
-            const errData = await response.json()
-            throw new ApiError(
-                `API Error: ${response.statusText}`,
-                response.status,
-                errData.detail || "Unknown error",
-            )
-        }
-        return response.json()
-    }    async caesarEncrypt(data: CaesarInput) {
+    async caesarEncrypt(data: CaesarInput) {
         return this.post("/api/classical/caesar/encrypt", data)
     }
     async vigenereEncrypt(data: KeyTextInput) {

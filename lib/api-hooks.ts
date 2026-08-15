@@ -135,7 +135,11 @@ export function useCryptoAction() {
                 const message = err.message || "Une erreur est survenue"
                 setError(message)
                 setLoading(false)
-                throw new Error(message)
+                // On relaie l'erreur d'origine plutôt qu'une `Error` nue : une
+                // `ApiError` porte le code métier (`decryption_failed`,
+                // `invalid_key`…), et c'est lui que les pages doivent tester —
+                // pas le message, qui est traduisible.
+                throw err
             }
         },
         [],
