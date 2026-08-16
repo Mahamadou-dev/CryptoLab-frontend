@@ -45,36 +45,48 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verifier que les secrets Vercel existent
+      # Un deploiement non configure est *ignore*, pas en echec. Auparavant ce
+      # garde-fou faisait echouer le job a chaque push, ce qui noyait les vraies
+      # regressions sous des notifications rouges permanentes. Un projet qui
+      # deploie via l'integration Git de Vercel n'a pas besoin de ces secrets.
+      - name: Le deploiement est-il configure ?
+        id: check
         run: |
           missing=""
           [ -z "${{ secrets.VERCEL_TOKEN }}" ] && missing="$missing VERCEL_TOKEN"
           [ -z "${{ secrets.VERCEL_ORG_ID }}" ] && missing="$missing VERCEL_ORG_ID"
           [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ] && missing="$missing VERCEL_PROJECT_ID"
+
           if [ -n "$missing" ]; then
-            echo "::error::Secrets manquants :$missing"
-            echo "Les recuperer avec 'npx vercel link' puis dans .vercel/project.json,"
-            echo "et le token dans Vercel > Account Settings > Tokens."
-            exit 1
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "missing=$missing" >> "$GITHUB_OUTPUT"
+            echo "::notice::Deploiement ignore : secrets absents :$missing"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Installer la CLI Vercel
+        if: steps.check.outputs.configured == 'true'
         run: npm install --global vercel@latest
 
       - name: Recuperer la configuration de production
+        if: steps.check.outputs.configured == 'true'
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Construire
+        if: steps.check.outputs.configured == 'true'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deployer
         id: deploy
+        if: steps.check.outputs.configured == 'true'
         run: |
           url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deploye sur $url"
 
       - name: Verifier que le site repond
+        if: steps.check.outputs.configured == 'true'
         run: |
           for attempt in $(seq 1 10); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "${{ steps.deploy.outputs.url }}")
@@ -91,13 +103,30 @@ jobs:
       - name: Resume
         if: always()
         run: |
-          {
-            echo "### Deploiement frontend"
-            echo ""
-            echo "- Commit : \`${{ github.sha }}\`"
-            echo "- URL : ${{ steps.deploy.outputs.url }}"
-            echo "- Resultat : ${{ job.status }}"
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.check.outputs.configured }}" != "true" ]; then
+            {
+              echo "### Deploiement frontend — ignore"
+              echo ""
+              echo "Secrets absents :\`${{ steps.check.outputs.missing }}\`"
+              echo ""
+              echo "Deux facons de mettre le frontend en ligne :"
+              echo ""
+              echo "1. **Integration Git de Vercel** — Vercel redeploie a chaque"
+              echo "   push. Simple, mais sans attendre la CI. Ce workflow reste inactif."
+              echo "2. **Deploiement pilote par la CI** — \`npx vercel link\` donne"
+              echo "   \`orgId\` et \`projectId\` dans \`.vercel/project.json\` ; le jeton"
+              echo "   vient de Vercel > Account Settings > Tokens. Desactiver alors"
+              echo "   les deploiements automatiques dans Vercel > Settings > Git."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Deploiement frontend"
+              echo ""
+              echo "- Commit : \`${{ github.sha }}\`"
+              echo "- URL : ${{ steps.deploy.outputs.url }}"
+              echo "- Resultat : ${{ job.status }}"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   preview:
     name: Deploiement de previsualisation
@@ -113,10 +142,24 @@ jobs:
         with:
           node-version: 22
 
+      # Meme regle que pour la production : sans jeton, on s'abstient au lieu
+      # d'echouer sur chaque pull request.
+      - name: Le deploiement est-il configure ?
+        id: check
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Previsualisation ignoree : VERCEL_TOKEN n'est pas defini."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Installer la CLI Vercel
+        if: steps.check.outputs.configured == 'true'
         run: npm install --global vercel@latest
 
       - name: Construire et deployer la previsualisation
+        if: steps.check.outputs.configured == 'true'
         run: |
           vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
