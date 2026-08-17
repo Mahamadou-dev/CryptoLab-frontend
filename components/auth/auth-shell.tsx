@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
-import { Lock } from "lucide-react"
+import { ArrowLeft, Lock } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -26,6 +26,22 @@ export function AuthShell({
     return (
         <main className="relative min-h-screen flex items-center justify-center px-4 py-16 overflow-hidden">
             <ByteWall />
+
+            {/* Sortie de secours. Ces pages n'ont pas de barre de navigation —
+                sans ce lien, un visiteur qui change d'avis n'a que le bouton
+                « precedent » du navigateur pour repartir. */}
+            <Link
+                href="/"
+                className={cn(
+                    "absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-xl",
+                    "px-3 py-2 text-sm text-foreground-secondary",
+                    "transition-colors hover:bg-surface hover:text-foreground",
+                    "sm:left-8 sm:top-8",
+                )}
+            >
+                <ArrowLeft className="h-4 w-4" />
+                Retour a l&apos;accueil
+            </Link>
 
             <motion.div
                 className="relative z-10 w-full max-w-md"

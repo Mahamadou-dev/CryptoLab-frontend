@@ -1,187 +1,79 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* Le mode sombre est porte par une classe sur <html>, posee par ThemeProvider. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-    /* === Variables de Thème Génériques === */
-    /* Elles servent de fallback (au cas où) et sont écrasées par les thèmes */
-    --color-primary: #7e22ce;
-    --color-secondary: #ec4899;
-    --color-tertiary: #c026d3;
-    --color-accent: #4c1d95;
+/* ═══════════════════════════════════════════════════════════════════════════
+   SYSTEME DE JETONS
+   ───────────────────────────────────────────────────────────────────────────
+   Trois couches, dans cet ordre :
 
-    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    --gradient-secondary: linear-gradient(135deg, var(--color-tertiary), var(--color-primary));
+   1. IDENTITE   — chaque theme ne declare que ses quatre teintes.
+   2. DERIVATION — fonds, surfaces, bordures et halos sont calcules a partir de
+                   ces teintes, une fois pour le mode clair, une fois pour le
+                   mode sombre. Les deux calibrages different : ce n'est pas une
+                   inversion, les proportions ne sont pas les memes.
+   3. PONT       — `@theme inline` transforme ces jetons en utilitaires Tailwind.
 
-    --background: #0b0013;
-    --foreground: #fdf4ff;
-    --bg-gradient-stop-1: #3b0764;
-    --bg-gradient-stop-2: #831843;
+   Pourquoi cette structure : dans la version precedente, chaque theme
+   redeclarait ses propres surfaces en rgba() fige, et le bloc `.dark`, place
+   en dernier a specificite egale, les ecrasait toutes avec les valeurs du
+   theme Gemini. Changer de theme ne changeait donc presque rien de visible.
+   Ici, un theme = quatre lignes, et tout le reste suit automatiquement.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-    --surface: rgba(126, 34, 206, 0.12);
-    --surface-hover: rgba(236, 72, 153, 0.18);
-    --surface-active: rgba(236, 72, 153, 0.25);
-    --border-color: rgba(236, 72, 153, 0.25);
-    --border-color-hover: rgba(236, 72, 153, 0.45);
-    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4),
-    0 0 45px rgba(126, 34, 206, 0.25);
 
-    --font-sans: "Inter", sans-serif;
-    --font-mono: "Fira Code", monospace;
-}
+/* ── 1. IDENTITE : quatre teintes par theme ───────────────────────────────── */
 
-/* === THÈME 1: GEMINI (Votre thème actuel) === */
-/* Définit les variables génériques ET les variables spécifiques */
+:root,
 .theme-gemini {
-    /* 1. Nouvelles variables génériques */
     --color-primary: #7e22ce;
     --color-secondary: #ec4899;
     --color-tertiary: #c026d3;
     --color-accent: #4c1d95;
-
-    /* 2. Variables spécifiques (pour la compatibilité ascendante) */
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    /* 3. Variables Glassmorphism (identiques) */
-    --surface: rgba(126, 34, 206, 0.12);
-    --surface-hover: rgba(236, 72, 153, 0.18);
-    --surface-active: rgba(236, 72, 153, 0.25);
-    --border-color: rgba(236, 72, 153, 0.25);
-    --border-color-hover: rgba(236, 72, 153, 0.45);
-    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4),
-    0 0 45px rgba(126, 34, 206, 0.25);
 }
 
-/* === THÈME 2: EXEMPLE VIOLET (Thème alternatif) === */
 .theme-purple {
-    /* 1. Nouvelles variables génériques */
     --color-primary: #8b5cf6;
     --color-secondary: #a78bfa;
     --color-tertiary: #7c3aed;
     --color-accent: #6d28d9;
-
-    /* 2. Variables spécifiques (pour la compatibilité ascendante) */
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    /* 3. Variables Glassmorphism (ajustées au thème) */
-    --surface: rgba(139, 92, 246, 0.12);
-    --surface-hover: rgba(139, 92, 246, 0.18);
-    --surface-active: rgba(139, 92, 246, 0.25);
-    --border-color: rgba(139, 92, 246, 0.25);
-    --border-color-hover: rgba(139, 92, 246, 0.45);
-    --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.4),
-    0 0 45px rgba(109, 40, 217, 0.25);
 }
 
-/* === NOUVEAU THÈME 3: OCEAN (Bleu/Turquoise) === */
 .theme-ocean {
     --color-primary: #0ea5e9;
     --color-secondary: #14b8a6;
     --color-tertiary: #06b6d4;
     --color-accent: #0891b2;
-
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    --surface: rgba(14, 165, 233, 0.12);
-    --surface-hover: rgba(14, 165, 233, 0.18);
-    --surface-active: rgba(20, 184, 166, 0.25);
-    --border-color: rgba(14, 165, 233, 0.25);
-    --border-color-hover: rgba(20, 184, 166, 0.45);
-    --shadow-glow: 0 0 25px rgba(14, 165, 233, 0.4),
-    0 0 45px rgba(20, 184, 166, 0.25);
 }
 
-/* === NOUVEAU THÈME 4: SOLAR (Orange/Jaune) === */
 .theme-solar {
     --color-primary: #f97316;
     --color-secondary: #eab308;
     --color-tertiary: #ea580c;
     --color-accent: #d97706;
-
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    --surface: rgba(249, 115, 22, 0.12);
-    --surface-hover: rgba(249, 115, 22, 0.18);
-    --surface-active: rgba(234, 179, 8, 0.25);
-    --border-color: rgba(249, 115, 22, 0.25);
-    --border-color-hover: rgba(234, 179, 8, 0.45);
-    --shadow-glow: 0 0 25px rgba(249, 115, 22, 0.4),
-    0 0 45px rgba(234, 179, 8, 0.25);
 }
 
-/* === NOUVEAU THÈME 5: EMERALD (Vert/Citron) === */
 .theme-emerald {
     --color-primary: #10b981;
     --color-secondary: #84cc16;
     --color-tertiary: #059669;
     --color-accent: #65a30d;
-
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    --surface: rgba(16, 185, 129, 0.12);
-    --surface-hover: rgba(16, 185, 129, 0.18);
-    --surface-active: rgba(132, 204, 22, 0.25);
-    --border-color: rgba(16, 185, 129, 0.25);
-    --border-color-hover: rgba(132, 204, 22, 0.45);
-    --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.4),
-    0 0 45px rgba(132, 204, 22, 0.25);
 }
 
-/* === NOUVEAU THÈME 6: CYBER (Cyan/Rose vif) === */
 .theme-cyber {
     --color-primary: #06b6d4;
     --color-secondary: #d946ef;
     --color-tertiary: #0891b2;
     --color-accent: #c026d3;
-
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-
-    --surface: rgba(6, 182, 212, 0.12);
-    --surface-hover: rgba(6, 182, 212, 0.18);
-    --surface-active: rgba(217, 70, 239, 0.25);
-    --border-color: rgba(6, 182, 212, 0.25);
-    --border-color-hover: rgba(217, 70, 239, 0.45);
-    --shadow-glow: 0 0 25px rgba(6, 182, 212, 0.4),
-    0 0 45px rgba(217, 70, 239, 0.25);
 }
-
-
-/* === THÈMES DE BASE (Déjà dans votre type) === */
 
 .theme-pink {
     --color-primary: #ec4899;
     --color-secondary: #f472b6;
     --color-tertiary: #db2777;
     --color-accent: #be185d;
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-    --surface: rgba(236, 72, 153, 0.12);
-    --surface-hover: rgba(236, 72, 153, 0.18);
-    --surface-active: rgba(236, 72, 153, 0.25);
-    --border-color: rgba(236, 72, 153, 0.25);
-    --border-color-hover: rgba(236, 72, 153, 0.45);
-    --shadow-glow: 0 0 25px rgba(236, 72, 153, 0.4);
 }
 
 .theme-blue {
@@ -189,16 +81,6 @@
     --color-secondary: #60a5fa;
     --color-tertiary: #2563eb;
     --color-accent: #1d4ed8;
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-    --surface: rgba(59, 130, 246, 0.12);
-    --surface-hover: rgba(59, 130, 246, 0.18);
-    --surface-active: rgba(59, 130, 246, 0.25);
-    --border-color: rgba(59, 130, 246, 0.25);
-    --border-color-hover: rgba(59, 130, 246, 0.45);
-    --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.4);
 }
 
 .theme-red {
@@ -206,16 +88,6 @@
     --color-secondary: #f87171;
     --color-tertiary: #dc2626;
     --color-accent: #b91c1c;
-    --color-violet: var(--color-primary);
-    --color-rose: var(--color-secondary);
-    --color-magenta: var(--color-tertiary);
-    --color-indigo: var(--color-accent);
-    --surface: rgba(239, 68, 68, 0.12);
-    --surface-hover: rgba(239, 68, 68, 0.18);
-    --surface-active: rgba(239, 68, 68, 0.25);
-    --border-color: rgba(239, 68, 68, 0.25);
-    --border-color-hover: rgba(239, 68, 68, 0.45);
-    --shadow-glow: 0 0 25px rgba(239, 68, 68, 0.4);
 }
 
 .theme-magenta {
@@ -223,85 +95,223 @@
     --color-secondary: #d946ef;
     --color-tertiary: #a21caf;
     --color-accent: #86198f;
+}
+
+
+/* ── 2a. DERIVATION : mode clair ──────────────────────────────────────────── */
+/*
+   Lire en amphi, sur videoprojecteur : le fond porte une teinte tres diluee,
+   le texte reste presque noir. Les surfaces sont legeres — sur fond clair, une
+   teinte a 10 % suffit a detacher une carte, la meme a 20 % la salit.
+*/
+:root {
+    --ink: #14101c;
+    --paper: #fbfaff;
+
+    --background: color-mix(in srgb, var(--color-primary) 3%, var(--paper));
+    --foreground: var(--ink);
+    --foreground-secondary: color-mix(in srgb, var(--ink) 68%, var(--background));
+    --foreground-tertiary: color-mix(in srgb, var(--ink) 46%, var(--background));
+
+    --bg-gradient-stop-1: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    --bg-gradient-stop-2: color-mix(in srgb, var(--color-secondary) 12%, transparent);
+
+    --surface: color-mix(in srgb, var(--color-primary) 7%, transparent);
+    --surface-hover: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    --surface-active: color-mix(in srgb, var(--color-secondary) 16%, transparent);
+
+    --border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+    --border-color-hover: color-mix(in srgb, var(--color-secondary) 38%, transparent);
+
+    /* En clair, une ombre porte la profondeur mieux qu'un halo colore. */
+    --shadow-glow:
+        0 1px 2px rgb(20 16 28 / 0.04),
+        0 10px 30px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+
+/* ── 2b. DERIVATION : mode sombre ─────────────────────────────────────────── */
+/*
+   Manipuler de nuit : le fond est un presque-noir teinte par la couleur du
+   theme, et c'est le halo qui porte la profondeur. Les surfaces montent a 16 %
+   — sur fond sombre, il en faut davantage pour qu'une carte se detache.
+*/
+.dark {
+    --ink: #06040c;
+    --paper: #f7f2ff;
+
+    --background: color-mix(in srgb, var(--color-primary) 7%, var(--ink));
+    --foreground: color-mix(in srgb, var(--color-secondary) 6%, var(--paper));
+    --foreground-secondary: color-mix(in srgb, var(--foreground) 72%, var(--background));
+    --foreground-tertiary: color-mix(in srgb, var(--foreground) 50%, var(--background));
+
+    --bg-gradient-stop-1: color-mix(in srgb, var(--color-primary) 42%, transparent);
+    --bg-gradient-stop-2: color-mix(in srgb, var(--color-secondary) 30%, transparent);
+
+    --surface: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    --surface-hover: color-mix(in srgb, var(--color-secondary) 20%, transparent);
+    --surface-active: color-mix(in srgb, var(--color-secondary) 28%, transparent);
+
+    --border-color: color-mix(in srgb, var(--color-secondary) 28%, transparent);
+    --border-color-hover: color-mix(in srgb, var(--color-secondary) 48%, transparent);
+
+    --shadow-glow:
+        0 0 25px color-mix(in srgb, var(--color-secondary) 34%, transparent),
+        0 0 55px color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+
+/* ── 2c. Jetons communs aux deux modes ────────────────────────────────────── */
+
+:root {
+    --gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    --gradient-secondary: linear-gradient(135deg, var(--color-tertiary), var(--color-primary));
+
+    /* Alias historiques. Ils pointent sur les teintes du theme actif : le code
+       qui les utilise suit donc le changement de theme sans etre touche. */
     --color-violet: var(--color-primary);
     --color-rose: var(--color-secondary);
     --color-magenta: var(--color-tertiary);
     --color-indigo: var(--color-accent);
-    --surface: rgba(192, 38, 211, 0.12);
-    --surface-hover: rgba(192, 38, 211, 0.18);
-    --surface-active: rgba(192, 38, 211, 0.25);
-    --border-color: rgba(192, 38, 211, 0.25);
-    --border-color-hover: rgba(192, 38, 211, 0.45);
-    --shadow-glow: 0 0 25px rgba(192, 38, 211, 0.4);
+
+    --accent-primary: var(--color-primary);
+    --accent-secondary: var(--color-secondary);
+    --accent-tertiary: var(--color-tertiary);
+
+    --font-sans: "Inter", sans-serif;
+    --font-mono: "Fira Code", monospace;
 }
 
 
-/* === Mode sombre (Générique) === */
-.dark {
-    --background: #090014;
-    --foreground: #faf5ff;
-    --bg-gradient-stop-1: #1e1b4b;
-    --bg-gradient-stop-2: #31071a;
+/* ── 3. PONT VERS TAILWIND ────────────────────────────────────────────────── */
+/*
+   Sans ce bloc, Tailwind 4 ne genere aucun utilitaire de couleur personnalise :
+   `text-foreground-secondary`, `bg-surface` et `text-accent-secondary` — tous
+   employes dans les pages — ne produisaient litteralement rien. C'etait la
+   cause principale de l'absence de hierarchie visuelle.
 
-    /* Le Glassmorphism en mode sombre peut rester générique ou être défini par thème */
-    /* Pour l'instant, je le laisse générique basé sur Gemini */
-    --surface: rgba(126, 34, 206, 0.15);
-    --surface-hover: rgba(236, 72, 153, 0.2);
-    --surface-active: rgba(236, 72, 153, 0.3);
-    --border-color: rgba(236, 72, 153, 0.3);
-    --border-color-hover: rgba(236, 72, 153, 0.5);
+   `inline` est indispensable : il fait pointer l'utilitaire sur la variable
+   plutot que d'en figer la valeur a la compilation. C'est ce qui permet au
+   changement de theme d'agir a l'execution.
+*/
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-foreground-secondary: var(--foreground-secondary);
+    --color-foreground-tertiary: var(--foreground-tertiary);
+
+    --color-surface: var(--surface);
+    --color-surface-hover: var(--surface-hover);
+    --color-surface-active: var(--surface-active);
+
+    --color-accent-primary: var(--accent-primary);
+    --color-accent-secondary: var(--accent-secondary);
+    --color-accent-tertiary: var(--accent-tertiary);
+
+    --color-violet: var(--color-violet);
+    --color-rose: var(--color-rose);
+    --color-magenta: var(--color-magenta);
+    --color-indigo: var(--color-indigo);
+
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-mono);
 }
 
-/* === Bases === */
+
+/* ── Bases ────────────────────────────────────────────────────────────────── */
+
 @layer base {
     body {
-        @apply bg-[var(--background)] text-[var(--foreground)] transition-colors duration-500;
+        color: var(--foreground);
         font-family: var(--font-sans);
-        background: radial-gradient(circle at 20% 30%, var(--bg-gradient-stop-1) 0%, transparent 60%),
-        radial-gradient(circle at 80% 70%, var(--bg-gradient-stop-2) 0%, transparent 60%),
-        var(--background);
+        background:
+            radial-gradient(circle at 20% 30%, var(--bg-gradient-stop-1) 0%, transparent 60%),
+            radial-gradient(circle at 80% 70%, var(--bg-gradient-stop-2) 0%, transparent 60%),
+            var(--background);
         background-attachment: fixed;
+        transition: background-color 0.4s ease, color 0.4s ease;
     }
+
     * {
-        @apply border-[var(--border-color)] antialiased;
+        border-color: var(--border-color);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Le focus doit rester visible partout : exigence WCAG 2.2, et premiere
+       chose que casse un reset trop zele. */
+    :focus-visible {
+        outline: 2px solid var(--color-secondary);
+        outline-offset: 2px;
     }
 }
 
-/* === Components === */
+
+/* ── Composants ───────────────────────────────────────────────────────────── */
+
 @layer components {
-    /* Ces classes utilisent les variables génériques,
-       elles se mettront à jour automatiquement avec le thème. */
     .glass {
         @apply backdrop-blur-2xl border rounded-2xl;
         background-color: var(--surface);
         border-color: var(--border-color);
         box-shadow: var(--shadow-glow);
-        transition: all 0.4s ease;
+        transition: background-color 0.3s ease, border-color 0.3s ease,
+                    box-shadow 0.3s ease, transform 0.3s ease;
     }
+
     .glass:hover {
         background-color: var(--surface-hover);
         border-color: var(--border-color-hover);
         transform: translateY(-2px);
     }
+
     .btn-gemini {
         background: var(--gradient-primary);
-        color: white;
+        color: #ffffff;
         @apply px-4 py-2 rounded-xl font-semibold transition-all;
-        box-shadow: var(--shadow-glow); /* Ombre dynamique */
+        box-shadow: var(--shadow-glow);
     }
+
     .btn-gemini:hover {
-        filter: brightness(1.15);
+        filter: brightness(1.12);
         transform: translateY(-2px);
     }
+
     .text-gradient {
         background: var(--gradient-primary);
+        background-clip: text;
         -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: transparent;
     }
 }
 
-/* === Animations (inchangées) === */
-@keyframes aurora { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-.animate-aurora { background: var(--gradient-secondary); background-size: 200% 200%; animation: aurora 10s ease-in-out infinite; }
-@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
-.animate-float { animation: float 6s ease-in-out infinite; }
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+
+@keyframes aurora {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.animate-aurora {
+    background: var(--gradient-secondary);
+    background-size: 200% 200%;
+    animation: aurora 10s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+}
+
+/* Toute animation decorative s'arrete si l'utilisateur l'a demande. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
-import { ArrowRight, BookOpen, ChevronDown, Sparkles } from "lucide-react"
+import { ArrowRight, BookOpen, ChevronDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
@@ -52,16 +52,6 @@ export function Hero() {
                 initial="hidden"
                 animate="visible"
             >
-                <motion.div
-                    variants={rise}
-                    className="glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2"
-                >
-                    <Sparkles className="h-4 w-4 text-[var(--color-secondary)]" />
-                    <span className="text-sm text-foreground-secondary">
-                        De Cesar au post-quantique, en manipulant
-                    </span>
-                </motion.div>
-
                 <motion.h1
                     variants={rise}
                     className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl"
