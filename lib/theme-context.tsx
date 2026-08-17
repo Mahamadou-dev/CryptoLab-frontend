@@ -120,11 +120,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         resolvedTheme, // Fournit l'état résolu
     }
 
-    // Affiche les enfants uniquement après le montage pour éviter le "flash"
-    if (!mounted) {
-        return null // Ou un loader
-    }
-
+    // Les enfants sont rendus dans tous les cas, y compris cote serveur.
+    //
+    // La version precedente renvoyait `null` tant que le composant n'etait pas
+    // monte, pour eviter un flash de theme. Le remede etait pire que le mal :
+    // le rendu serveur ne produisait plus qu'un <body> vide, donc aucun contenu
+    // pour les moteurs de recherche ni pour le premier affichage.
+    //
+    // Le flash est desormais traite a la source, par `ThemeScript` (voir
+    // app/layout.tsx) : il applique les classes avant le premier pixel peint.
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 

@@ -72,7 +72,12 @@ export function CipherRing({ palette, animated }: { palette: Palette; animated: 
             scratch.matrix.compose(scratch.position, scratch.quat, scratch.scale)
 
             mesh.setMatrixAt(index, scratch.matrix)
-            mesh.setColorAt(index, scratch.color.copy(colors.calm).lerp(colors.active, heat))
+
+            // Au-dela de 1, le bloom s'empare de la barre : seul l'arc actif
+            // rayonne, le reste de l'anneau reste sobre.
+            scratch.color.copy(colors.calm).lerp(colors.active, heat)
+            if (heat > 0.01) scratch.color.multiplyScalar(1 + heat * 1.8)
+            mesh.setColorAt(index, scratch.color)
         }
 
         mesh.instanceMatrix.needsUpdate = true
@@ -81,9 +86,14 @@ export function CipherRing({ palette, animated }: { palette: Palette; animated: 
     })
 
     return (
-        <instancedMesh ref={meshRef} args={[undefined, undefined, BARS]}>
+        <instancedMesh ref={meshRef} args={[undefined, undefined, BARS]} castShadow>
             <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial roughness={0.4} metalness={0.5} envMapIntensity={1.1} />
+            <meshStandardMaterial
+                roughness={0.3}
+                metalness={0.85}
+                envMapIntensity={1.5}
+                toneMapped={false}
+            />
         </instancedMesh>
     )
 }

@@ -13,12 +13,15 @@ export interface Palette {
     primary: string
     secondary: string
     tertiary: string
+    /** Fond resolu du theme : sert a la brume et au sol, qui doivent s'y fondre. */
+    background: string
 }
 
 const FALLBACK: Palette = {
     primary: "#7e22ce",
     secondary: "#ec4899",
     tertiary: "#c026d3",
+    background: "#0b0013",
 }
 
 export function useThemePalette(): Palette {
@@ -36,6 +39,9 @@ export function useThemePalette(): Palette {
                 primary: pick("--color-primary", FALLBACK.primary),
                 secondary: pick("--color-secondary", FALLBACK.secondary),
                 tertiary: pick("--color-tertiary", FALLBACK.tertiary),
+                // `--background` est calcule par color-mix() : la valeur lue est
+                // deja resolue en couleur concrete, que Three.js sait parser.
+                background: pick("--background", FALLBACK.background),
             })
         }
 

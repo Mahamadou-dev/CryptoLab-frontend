@@ -1,6 +1,5 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
 import { ArrowRight, BookOpen, ChevronDown } from "lucide-react"
@@ -8,12 +7,14 @@ import { ArrowRight, BookOpen, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 
-// La scene WebGL ne rend rien cote serveur et pese plusieurs centaines de
-// kilo-octets : elle est chargee apres coup, une fois la page lisible.
-const HeroCanvas = dynamic(
-    () => import("@/components/3d/landing/hero-canvas").then((module) => module.HeroCanvas),
-    { ssr: false },
-)
+/**
+ * Premier ecran.
+ *
+ * Il ne porte plus sa propre scene : la chambre forte est montee une seule fois
+ * par la page et reste derriere tout le document. Le Hero n'est donc que du
+ * texte pose par-dessus — ce qui le rend lisible par un moteur de recherche et
+ * par un lecteur d'ecran, alors qu'un titre modelise en 3D ne le serait pas.
+ */
 
 const container = {
     hidden: {},
@@ -36,16 +37,7 @@ export function Hero() {
         : { href: "/register", label: "Creer mon compte" }
 
     return (
-        <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden">
-            <HeroCanvas className="absolute inset-0 -z-10" />
-
-            {/* Fondu vers le fond de page : la scene doit s'eteindre sous le
-                texte, pas rivaliser avec lui. */}
-            <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[var(--background)]/70 via-transparent to-[var(--background)]"
-            />
-
+        <section className="relative flex min-h-screen items-center justify-center">
             <motion.div
                 className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-6 text-center"
                 variants={container}
@@ -54,7 +46,7 @@ export function Hero() {
             >
                 <motion.h1
                     variants={rise}
-                    className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl"
+                    className="mb-6 text-6xl font-bold tracking-tight sm:text-7xl lg:text-8xl"
                 >
                     <span className="text-gradient">CryptoLab</span>
                 </motion.h1>
@@ -82,7 +74,7 @@ export function Hero() {
                     <Link href="/learn">
                         <Button
                             variant="outline"
-                            className="glass flex items-center rounded-xl text-[var(--foreground)] backdrop-blur-md"
+                            className="glass flex items-center rounded-xl text-foreground backdrop-blur-md"
                         >
                             <BookOpen className="mr-2 h-5 w-5" /> Parcourir le cours
                         </Button>

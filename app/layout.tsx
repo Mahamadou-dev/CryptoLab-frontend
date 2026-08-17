@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/lib/theme-context"
 import { LanguageProvider } from "@/lib/language-context"
 import { AuthProvider } from "@/lib/auth-context"
 import { AccessibilitySkipLink } from "@/components/accessibility-skip-link"
+import { ThemeScript } from "@/components/theme-script"
 import "./globals.css"
 import {ScrollToTopButton} from "@/components/sroll-to-top-button";
 
@@ -31,6 +32,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Doit rester le premier script du document : il pose les classes de
+            theme avant le premier affichage. */}
+        <ThemeScript />
       </head>
       <body className={`${inter.variable} ${firaCode.variable} font-sans`}>
         <ThemeProvider>
