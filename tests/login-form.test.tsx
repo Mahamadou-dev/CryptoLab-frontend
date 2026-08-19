@@ -1,8 +1,27 @@
-﻿import { screen, waitFor } from "@testing-library/react"
+﻿import { fireEvent, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import LoginPage from "@/app/login/page"
 import { ROUTER, render, setSearchParams, stubFetch, USER } from "./helpers"
+
+import type { UserEvent } from "@testing-library/user-event"
+
+/**
+ * Renseigne les deux champs en un evenement chacun.
+ *
+ * `user.type` frappe caractere par caractere, et chaque frappe re-rend le
+ * formulaire : trente touches coutaient plus d'une seconde par test, ce qui
+ * faisait dépasser le delai des que la machine etait chargee. Aucun de ces
+ * tests ne porte sur la frappe elle-meme — ils portent sur ce qui est envoye.
+ */
+function fill(email: string, password: string) {
+    fireEvent.change(screen.getByLabelText("Adresse e-mail"), { target: { value: email } })
+    fireEvent.change(screen.getByLabelText("Mot de passe"), { target: { value: password } })
+}
+
+function submit(user: UserEvent) {
+    return user.click(screen.getByRole("button", { name: /se connecter/i }))
+}
 
 beforeEach(() => {
     setSearchParams("")
@@ -19,9 +38,8 @@ describe("connexion reussie", () => {
         const { calls } = stubFetch({ "/api/auth/login": { body: { user: USER } } })
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "etudiant@fsm.tn")
-        await user.type(screen.getByLabelText("Mot de passe"), "phrase de passe")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("etudiant@fsm.tn", "phrase de passe")
+        await submit(user)
 
         await waitFor(() => expect(ROUTER.replace).toHaveBeenCalledWith("/simulations/aes"))
         expect(calls.find((call) => call.url === "/api/auth/login")?.body).toEqual({
@@ -37,9 +55,8 @@ describe("connexion reussie", () => {
         const { calls } = stubFetch({ "/api/auth/login": { body: { user: USER } } })
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "  etudiant@fsm.tn  ")
-        await user.type(screen.getByLabelText("Mot de passe"), " espaces significatifs ")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("  etudiant@fsm.tn  ", " espaces significatifs ")
+        await submit(user)
 
         await waitFor(() => expect(ROUTER.replace).toHaveBeenCalled())
         expect(calls.find((call) => call.url === "/api/auth/login")?.body).toEqual({
@@ -53,9 +70,8 @@ describe("connexion reussie", () => {
         stubFetch({ "/api/auth/login": { body: { user: USER } } })
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "etudiant@fsm.tn")
-        await user.type(screen.getByLabelText("Mot de passe"), "phrase de passe")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("etudiant@fsm.tn", "phrase de passe")
+        await submit(user)
 
         await waitFor(() => expect(ROUTER.replace).toHaveBeenCalledWith("/simulations"))
     })
@@ -68,9 +84,8 @@ describe("echec de connexion", () => {
         })
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "etudiant@fsm.tn")
-        await user.type(screen.getByLabelText("Mot de passe"), "mauvais mot de passe")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("etudiant@fsm.tn", "mauvais mot de passe")
+        await submit(user)
 
         expect(await screen.findByRole("alert")).toHaveTextContent("Identifiants invalides.")
         expect(ROUTER.replace).not.toHaveBeenCalled()
@@ -90,9 +105,8 @@ describe("echec de connexion", () => {
         )
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "etudiant@fsm.tn")
-        await user.type(screen.getByLabelText("Mot de passe"), "phrase de passe")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("etudiant@fsm.tn", "phrase de passe")
+        await submit(user)
 
         expect(await screen.findByRole("alert")).toHaveTextContent(/reseau/i)
     })
@@ -120,9 +134,8 @@ describe("etat d'attente", () => {
         })
         const { user } = await render(<LoginPage />)
 
-        await user.type(screen.getByLabelText("Adresse e-mail"), "etudiant@fsm.tn")
-        await user.type(screen.getByLabelText("Mot de passe"), "phrase de passe")
-        await user.click(screen.getByRole("button", { name: /se connecter/i }))
+        fill("etudiant@fsm.tn", "phrase de passe")
+        await submit(user)
 
         const button = await screen.findByRole("button", { name: /connexion\.\.\./i })
         expect(button).toBeDisabled()

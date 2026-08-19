@@ -14,6 +14,11 @@ export default defineConfig({
     plugins: [tsconfigPaths(), react()],
     test: {
         environment: "jsdom",
+        // 5 s (le defaut) etait trop juste : ces tests montent une page reelle
+        // dans jsdom et attendent des promesses, et la suite devenait instable
+        // des que la machine etait chargee — des echecs qui variaient d'un run
+        // a l'autre. Un test instable erode la confiance plus qu'il ne protege.
+        testTimeout: 15_000,
         globals: true,
         setupFiles: ["./tests/setup.ts"],
         include: ["tests/**/*.test.{ts,tsx}"],

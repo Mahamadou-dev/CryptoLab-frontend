@@ -16,6 +16,7 @@ export function Navigation() {
 
     const navLinks = [
         { href: "/", label: t("nav.home", "Accueil") }, // Ajout de valeurs par défaut
+        { href: "/algorithms", label: t("nav.algorithms", "Catalogue") },
         { href: "/simulations", label: t("nav.simulations", "Simulations") },
         { href: "/learn", label: t("nav.learn", "Cours") },
         { href: "/about", label: t("nav.about", "À Propos") },
