@@ -20,7 +20,7 @@ C'est un outil pensé pour les étudiants, les développeurs curieux et les pass
 
 Frontend (Next.js) : https://cryptolab.vercel.app/ 
 
-Backend (API Docs) : https://cryptolab-api.onrender.com/docs
+Backend (API Docs) : https://cryptolab-backend.onrender.com/docs
 
 ✨ Fonctionnalités Principales
 

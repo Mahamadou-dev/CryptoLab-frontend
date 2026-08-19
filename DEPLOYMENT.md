@@ -60,7 +60,7 @@ Et, dans l'onglet **Variables** (facultatif) :
 
 | Clé | Valeur | Environnements |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `https://cryptolab-api.onrender.com` | Production, Preview |
+| `NEXT_PUBLIC_API_URL` | `https://cryptolab-backend.onrender.com` | Production, Preview |
 
 Cette URL doit figurer dans le `CRYPTOLAB_ALLOWED_ORIGINS` du backend, sinon
 le navigateur bloquera les appels au titre du CORS.
