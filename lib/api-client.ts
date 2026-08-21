@@ -329,6 +329,26 @@ export class CryptoAPIClient {
     async simulate(algo: string, data: Record<string, unknown>) {
         return this.post<SimulationTrace>(`/api/simulate/${algo}`, data)
     }
+
+    /**
+     * Appel générique d'une opération du catalogue (`/api/algorithms`).
+     *
+     * Les algorithmes ajoutés en Sprint 6 (clef publique) n'ont pas tous un
+     * composant `simulator-*.tsx` dédié : plutôt que d'en écrire un par
+     * algorithme, `SimulatorGeneric` pilote un formulaire depuis le schéma
+     * JSON déjà servi par le registre (`AlgorithmOperation.schema`) et
+     * appelle sa route exacte via cette méthode.
+     */
+    async runOperation<T = CryptoActionResult>(
+        method: string,
+        path: string,
+        data?: Record<string, unknown>,
+    ) {
+        if (method.toUpperCase() === "GET") {
+            return this.get<T>(path)
+        }
+        return this.post<T>(path, data ?? {})
+    }
 }
 
 // Exporte une instance unique (singleton)

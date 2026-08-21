@@ -38,6 +38,7 @@ import { SimulatorDes } from "@/components/simulator-des"
 import { SimulatorAes } from "@/components/simulator-aes"
 import { SimulatorRsa } from "@/components/simulator-rsa"
 import {SimulatorRailfence} from "@/components/simulator-railfence";
+import { SimulatorGenericAsymmetric } from "@/components/simulator-generic-asymmetric"
 
 // --- IMPORTATION DES VRAIES VISUALISATIONS 3D ---
 import { DataCube } from "@/components/3d/data-cube"
@@ -81,6 +82,21 @@ const simulatorMap: Record<string, React.ComponentType<SimulatorProps>> = {
     aes: SimulatorAes,
     rsa: SimulatorRsa,
 
+    // Sprint 6 — clef publique : formulaire generique pilote par le schema
+    // JSON du catalogue (`/api/algorithms`), pas de composant dedie.
+    rsasmall: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="rsasmall" />,
+    rsasignature: (props: SimulatorProps) => (
+        <SimulatorGenericAsymmetric {...props} algoId="rsasignature" />
+    ),
+    diffiehellman: (props: SimulatorProps) => (
+        <SimulatorGenericAsymmetric {...props} algoId="diffiehellman" />
+    ),
+    ecdh: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="ecdh" />,
+    ecc: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="ecc" />,
+    ecdsa: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="ecdsa" />,
+    ed25519: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="ed25519" />,
+    dsa: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="dsa" />,
+    elgamal: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="elgamal" />,
 }
 
 const vizMap: Record<string, React.ComponentType<{ simulationData: SimulationTrace | null }>> = {
