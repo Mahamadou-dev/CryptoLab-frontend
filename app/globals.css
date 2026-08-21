@@ -250,9 +250,15 @@
     body {
         color: var(--foreground);
         font-family: var(--font-sans);
+        /* La grille comme structure, pas comme decor : une trame tres discrete,
+           au pas de la matrice d'etat AES (4 unites), sous les degrades de
+           theme — le meme module geometrique qui gouverne les grilles de
+           cartes gouverne aussi le fond. */
         background:
             radial-gradient(circle at 20% 30%, var(--bg-gradient-stop-1) 0%, transparent 60%),
             radial-gradient(circle at 80% 70%, var(--bg-gradient-stop-2) 0%, transparent 60%),
+            repeating-linear-gradient(to right, var(--border-color) 0 1px, transparent 1px 4rem),
+            repeating-linear-gradient(to bottom, var(--border-color) 0 1px, transparent 1px 4rem),
             var(--background);
         background-attachment: fixed;
         transition: background-color 0.4s ease, color 0.4s ease;

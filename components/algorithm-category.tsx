@@ -28,14 +28,15 @@ export function AlgorithmCategory({ category, algorithms }: AlgorithmCategoryPro
     return (
         <div className="space-y-6">
             <div>
-                <div className={`inline-block px-4 py-1 rounded-full bg-gradient-to-r ${info.color} bg-opacity-20 mb-3`}>
-          <span className={`text-sm font-semibold bg-gradient-to-r ${info.color} bg-clip-text text-transparent`}>
-            {/* CORRIGÉ */}
-              {categoryName}
-          </span>
+                {/* Categorie : un seul accent, sans degrade — le label monospace
+                    (voix des donnees, pas du texte editorial) suffit a distinguer
+                    la famille sans lui inventer sa propre couleur. */}
+                <div className="inline-block px-4 py-1 rounded-full bg-accent-primary/10 border border-accent-primary/30 mb-3">
+                    <span className="text-sm font-semibold font-mono text-accent-primary">
+                        {categoryName}
+                    </span>
                 </div>
-                {/* CORRIGÉ */}
-                <h2 className="text-2xl font-bold mb-2">{categoryName}</h2>
+                <h2 className="text-2xl font-bold mb-2 text-gradient">{categoryName}</h2>
                 {/* CORRIGÉ */}
                 <p className="text-foreground-secondary max-w-2xl">{categoryDescription}</p>
             </div>

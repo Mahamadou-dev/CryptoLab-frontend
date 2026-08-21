@@ -108,21 +108,17 @@ export const categoryInfo = {
     classic: {
         name: "category.classic.name",
         description: "category.classic.description",
-        color: "from-blue-500 to-cyan-500",
     },
     symmetric: {
         name: "category.symmetric.name",
         description: "category.symmetric.description",
-        color: "from-purple-500 to-pink-500",
     },
     asymmetric: {
         name: "category.asymmetric.name",
         description: "category.asymmetric.description",
-        color: "from-orange-500 to-red-500",
     },
     hash: {
         name: "category.hash.name",
         description: "category.hash.description",
-        color: "from-green-500 to-emerald-500",
     },
 }
