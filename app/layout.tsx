@@ -1,5 +1,5 @@
 import type React from "react"
-import { Inter, Fira_Code } from "next/font/google"
+import { Inter, Fira_Code, Space_Grotesk } from "next/font/google"
 import { ThemeProvider } from "@/lib/theme-context"
 import { LanguageProvider } from "@/lib/language-context"
 import { AuthProvider } from "@/lib/auth-context"
@@ -10,6 +10,10 @@ import {ScrollToTopButton} from "@/components/sroll-to-top-button";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 const firaCode = Fira_Code({ subsets: ["latin"], variable: "--font-mono" })
+// Voix editoriale : titres et articles. Un caractere geometrique et technique,
+// distinct de l'interface neutre — la grille et l'octet ont une typographie
+// qui leur ressemble, pas un sans-serif generique.
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" })
 
 export const metadata = {
   title: "CryptoLab - Interactive Cryptography Playground",
@@ -36,7 +40,7 @@ export default function RootLayout({
             theme avant le premier affichage. */}
         <ThemeScript />
       </head>
-      <body className={`${inter.variable} ${firaCode.variable} font-sans`}>
+      <body className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable} font-sans`}>
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>

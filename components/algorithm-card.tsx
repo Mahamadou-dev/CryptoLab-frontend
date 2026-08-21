@@ -55,7 +55,7 @@ export function AlgorithmCard({
                 <div
                     className={cn(
                         "inline-flex items-center justify-center rounded-xl mb-4 w-fit p-3 transition-all duration-300",
-                        "bg-gradient-to-br from-accent-primary/20 to-accent-secondary/20 border border-accent-primary/30 group-hover:border-accent-primary/60",
+                        "bg-accent-primary/10 border border-accent-primary/30 group-hover:border-accent-primary/60",
                     )}
                 >
                     <div className={cn("text-gradient font-bold", featured ? "text-5xl" : "text-4xl")}>{icon}</div>

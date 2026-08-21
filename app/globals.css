@@ -185,6 +185,9 @@
 
     --font-sans: "Inter", sans-serif;
     --font-mono: "Fira Code", monospace;
+    /* Voix editoriale : titres, h1/h2 d'articles. Jamais l'interface — boutons
+       et libelles de formulaire restent en --font-sans, neutre. */
+    --font-display: "Space Grotesk", "Inter", sans-serif;
 }
 
 
@@ -220,6 +223,7 @@
 
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);
+    --font-display: var(--font-display);
 }
 
 
@@ -269,39 +273,46 @@
         transform: translateY(-2px);
     }
 
+    /* Bouton primaire : un seul accent, plein, sans degrade. Le nom de classe
+       reste .btn-gemini par compatibilite — des dizaines de composants
+       l'utilisent deja — mais son style n'a plus rien de la palette du
+       theme "Gemini" d'origine. */
     .btn-gemini {
-        background: var(--gradient-primary);
+        background: var(--color-primary);
         color: #ffffff;
         @apply px-4 py-2 rounded-xl font-semibold transition-all;
         box-shadow: var(--shadow-glow);
     }
 
     .btn-gemini:hover {
-        filter: brightness(1.12);
+        background: var(--color-tertiary);
         transform: translateY(-2px);
     }
 
+    /* Titres : la voix editoriale (--font-display), un seul accent plein —
+       plus de degrade multicolore sur le texte. Le sens vient de la donnee,
+       pas d'un arc-en-ciel repete sur chaque titre de page. */
     .text-gradient {
-        background: var(--gradient-primary);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
+        font-family: var(--font-display);
+        font-weight: 600;
+        color: var(--color-primary);
     }
 }
 
 
 /* ── Animations ───────────────────────────────────────────────────────────── */
 
+/* Respiration lente et discrete, un seul accent — remplace l'ancien
+   degrade arc-en-ciel qui balayait deux teintes en boucle. */
 @keyframes aurora {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.85; }
 }
 
 .animate-aurora {
-    background: var(--gradient-secondary);
-    background-size: 200% 200%;
-    animation: aurora 10s ease-in-out infinite;
+    background: radial-gradient(circle at 50% 40%, var(--color-primary) 0%, transparent 70%);
+    opacity: 0.6;
+    animation: aurora 6s ease-in-out infinite;
 }
 
 @keyframes float {
