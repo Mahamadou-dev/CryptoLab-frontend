@@ -8,22 +8,23 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, Lock, Unlock, Key } from "lucide-react"
+import { Loader2, Lock, Unlock, Key } from "lucide-react"
 // --- AJOUT I18N ---
-import { useTranslation, Language } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import {useLanguage} from "@/lib/language-context";
+import type { SimulationTrace, CryptoActionResult } from "@/lib/api-client"
 
 interface SimulatorRsaProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
 }
 
 export function SimulatorRsa({
-                                 setSimResult,
+                                 setSimResult: _setSimResult,
                                  setFinalOutput,
                                  clearResults,
                                  onSimulationStart,
@@ -44,7 +45,7 @@ export function SimulatorRsa({
 
     const [cipherText, setCipherText] = useState("")
 
-    const { execute, loading: actionLoading, error: actionError } = useCryptoAction()
+    const { execute, error: actionError } = useCryptoAction()
     const isLoading = isSimulating
 
     // --- Gestionnaires d'Actions ---
@@ -52,7 +53,7 @@ export function SimulatorRsa({
     const handleGenerateKeys = async () => {
         clearResults()
         onSimulationStart()
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute("rsa", "generateKeys", null)
             apiResponse = response
@@ -72,7 +73,7 @@ export function SimulatorRsa({
         }
         clearResults()
         onSimulationStart()
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute("rsa", "encrypt", {
                 text: text,
@@ -93,7 +94,7 @@ export function SimulatorRsa({
         }
         clearResults()
         onSimulationStart()
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute("rsa", "decrypt", {
                 cipher_hex: cipherText,

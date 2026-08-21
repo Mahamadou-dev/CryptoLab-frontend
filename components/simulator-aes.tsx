@@ -8,21 +8,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, Lock, Unlock, Play } from "lucide-react"
+import { Loader2, Unlock, Play } from "lucide-react"
+import type { CryptoActionResult, SimulationTrace } from "@/lib/api-client"
 
 // Interface pour les props (maintenant standardisée)
 interface SimulatorAesProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
 }
 
 export function SimulatorAes({
-                                 setSimResult,
-                                 setFinalOutput,
                                  clearResults,
                                  onSimulationStart,
                                  onSimulationEnd,
@@ -38,8 +37,8 @@ export function SimulatorAes({
     const [tag, setTag] = useState("")
 
     // --- Nos Hooks API ---
-    const { simulate, loading: simLoading, error: simError } = useSimulate()
-    const { execute, loading: actionLoading, error: actionError } = useCryptoAction()
+    const { simulate, error: simError } = useSimulate()
+    const { execute, error: actionError } = useCryptoAction()
 
     const isLoading = isSimulating
 
@@ -212,7 +211,7 @@ export function SimulatorAes({
             {/* Affichage de l'erreur */}
             {error && (
                 <Alert variant="destructive">
-                    <AlertTitle>Erreur de l'API</AlertTitle>
+                    <AlertTitle>Erreur de l&apos;API</AlertTitle>
                     <AlertDescription className="break-all">{error}</AlertDescription>
                 </Alert>
             )}

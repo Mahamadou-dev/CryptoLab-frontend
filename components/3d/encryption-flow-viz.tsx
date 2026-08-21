@@ -87,9 +87,13 @@ export function EncryptionFlowViz() {
 
     window.addEventListener("resize", handleResize)
 
+    // Copié au moment du montage : au démontage, `containerRef.current` peut
+    // déjà valoir `null` (React l'efface avant d'exécuter le nettoyage).
+    const container = containerRef.current
+
     return () => {
       window.removeEventListener("resize", handleResize)
-      containerRef.current?.removeChild(renderer.domElement)
+      container?.removeChild(renderer.domElement)
     }
   }, [])
 

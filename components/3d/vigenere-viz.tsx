@@ -1,19 +1,34 @@
 "use client"
 
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import {
     OrbitControls,
     Text3D,
     Center,
-    Plane,
 } from "@react-three/drei"
 import React, { Suspense, useMemo, useState, useEffect, useRef } from "react"
-import { Group, MeshStandardMaterial, BoxGeometry, Vector3 } from "three"
-import * as THREE from "three"
+import { Vector3 } from "three"
+import type { SimulationTrace } from "@/lib/api-client"
 
 // Assurez-vous que ce fichier existe bien dans /public/fonts/
 const FONT_URL = "/fonts/helvetiker_bold.typeface.json"
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+/** Une étape brute de la trace `/api/simulate/vigenere`. */
+interface VigenereRawStep {
+    current_char?: string
+    key_char_used?: string
+    output_char?: string
+    intermediate_result?: string
+    description: string
+}
+
+interface LetterStep {
+    plain: string
+    key: string
+    out: string
+    result: string
+}
 
 // --- COMPOSANT POUR LA GRILLE 26x26 ---
 const TabulaRectaGrid = React.memo(
@@ -123,37 +138,47 @@ const IOTexts = React.memo(
 IOTexts.displayName = "IOTexts"
 
 // --- SCÈNE PRINCIPALE ---
-function Scene({ simulationData }: { simulationData: any }) {
+function Scene({ simulationData }: { simulationData: SimulationTrace | null }) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
     // 1. Extraire les données pertinentes de la simulation
     const { letterSteps, fullPlainText, fullKey } = useMemo(() => {
         if (!simulationData?.steps?.length) {
-            return { letterSteps: [], fullPlainText: "", fullKey: "" }
+            return { letterSteps: [] as LetterStep[], fullPlainText: "", fullKey: "" }
         }
 
+        const steps = simulationData.steps as VigenereRawStep[]
+
         // Extrait le texte original et la clé depuis l'étape 0
-        const initStep = simulationData.steps[0].description
+        const initStep = steps[0].description
         const fullPlainText = initStep.match(/Texte: '([^']*)'/)?.[1] || ""
         const fullKey = initStep.match(/Clé: '([^']*)'/)?.[1] || ""
 
-        const steps = simulationData.steps
-            .filter((s: any) => s.current_char && s.key_char_used)
-            .map((s: any) => ({
-                plain: s.current_char.toUpperCase(),
-                key: s.key_char_used.toUpperCase(),
-                out: s.output_char.toUpperCase(),
-                result: s.intermediate_result,
+        const letterSteps: LetterStep[] = steps
+            .filter((s) => s.current_char && s.key_char_used)
+            .map((s) => ({
+                plain: s.current_char!.toUpperCase(),
+                key: s.key_char_used!.toUpperCase(),
+                out: (s.output_char ?? "").toUpperCase(),
+                result: s.intermediate_result ?? "",
             }))
-        return { letterSteps: steps, fullPlainText, fullKey }
+        return { letterSteps, fullPlainText, fullKey }
     }, [simulationData])
 
-    // 2. Logique de l'animation (boucle)
+    // 2. Repart de zéro chaque fois qu'une nouvelle trace arrive — comparaison
+    // à une ref pendant le rendu (motif documenté par React : "Storing
+    // information from previous renders"), pas dans un effet.
+    const previousSteps = useRef(letterSteps)
+    /* eslint-disable react-hooks/refs -- lecture et ecriture de ref pendant le rendu, motif documente par React */
+    if (previousSteps.current !== letterSteps) {
+        previousSteps.current = letterSteps
+        if (currentStepIndex !== 0) setCurrentStepIndex(0)
+    }
+    /* eslint-enable react-hooks/refs */
+
+    // 3. Logique de l'animation (boucle)
     useEffect(() => {
-        if (!letterSteps.length) {
-            setCurrentStepIndex(0)
-            return
-        }
+        if (!letterSteps.length) return
         const interval = setInterval(() => {
             setCurrentStepIndex((prevIndex) => (prevIndex + 1) % letterSteps.length)
         }, 1500) // Change de lettre toutes les 1.5 secondes
@@ -190,7 +215,7 @@ function Scene({ simulationData }: { simulationData: any }) {
 }
 
 // --- COMPOSANT PRINCIPAL WRAPPER ---
-export function VigenereViz({ simulationData }: { simulationData: any }) {
+export function VigenereViz({ simulationData }: { simulationData: SimulationTrace | null }) {
     return (
         <Canvas camera={{ position: [0, 0, 30], fov: 50 }} gl={{ antialias: true }}>
             <ambientLight intensity={1.5} />

@@ -57,6 +57,40 @@ export interface RsaDecryptInput {
     private_key: string
 }
 
+/**
+ * Résultat d'une opération de chiffrement/déchiffrement/hachage.
+ *
+ * La forme exacte dépend de l'algorithme et de l'action (un `cipher` en clair
+ * pour César, un `cipher_hex` + `nonce_hex` + `tag_hex` pour AES-GCM, un
+ * `public_key`/`private_key` pour la génération de clés RSA…) : les
+ * simulateurs ne lisent que les champs qui les concernent, d'où l'index
+ * signature en complément des champs connus.
+ */
+export interface CryptoActionResult {
+    cipher?: string
+    plain?: string
+    cipher_hex?: string
+    nonce_hex?: string
+    tag_hex?: string
+    iv_hex?: string
+    hash?: string
+    match?: boolean
+    public_key?: string
+    private_key?: string
+    final_result?: string
+    [key: string]: unknown
+}
+
+/**
+ * Trace d'une simulation pas à pas, telle que renvoyée par `/api/simulate/*`.
+ * Le format précis (liste d'étapes, matrices, etc.) varie par algorithme ;
+ * les visualisations 3D en dérivent leur propre lecture.
+ */
+export interface SimulationTrace {
+    steps?: unknown[]
+    [key: string]: unknown
+}
+
 // --- /api/algorithms (catalogue servi par le registre) ---
 
 /** Ce qu'on a le droit de faire d'un algorithme, porté par la donnée. */
@@ -68,7 +102,7 @@ export interface AlgorithmOperation {
     path: string
     summary: string
     /** Schéma JSON de l'entrée : de quoi construire un formulaire sans rien coder. */
-    schema: Record<string, any> | null
+    schema: Record<string, unknown> | null
 }
 
 export interface TestVector {
@@ -183,7 +217,7 @@ export class CryptoAPIClient {
         return `${this.baseUrl.replace(/\/$/, "")}${endpoint}`
     }
 
-    private async post<T = any>(endpoint: string, body: unknown): Promise<T> {
+    private async post<T = unknown>(endpoint: string, body: unknown): Promise<T> {
         const response = await fetch(this.url(endpoint), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -192,7 +226,7 @@ export class CryptoAPIClient {
         return unwrap<T>(response)
     }
 
-    private async get<T = any>(endpoint: string): Promise<T> {
+    private async get<T = unknown>(endpoint: string): Promise<T> {
         return unwrap<T>(await fetch(this.url(endpoint)))
     }
 
@@ -214,13 +248,13 @@ export class CryptoAPIClient {
     }
 
     async caesarEncrypt(data: CaesarInput) {
-        return this.post("/api/classical/caesar/encrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/caesar/encrypt", data)
     }
     async vigenereEncrypt(data: KeyTextInput) {
-        return this.post("/api/classical/vigenere/encrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/vigenere/encrypt", data)
     }
     async playfairEncrypt(data: KeyTextInput) {
-        return this.post("/api/classical/playfair/encrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/playfair/encrypt", data)
     }
     /**
      * Rail Fence : le vrai chiffre en zigzag.
@@ -228,72 +262,72 @@ export class CryptoAPIClient {
      * et l'aller-retour est exact.
      */
     async railfenceEncrypt(data: CaesarInput) {
-        return this.post("/api/classical/railfence/encrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/railfence/encrypt", data)
     }
     /**
      * Transposition par colonnes : l'algorithme que la route `/railfence`
      * implémentait réellement avant la v2. Il a désormais son propre nom.
      */
     async columnarEncrypt(data: KeyTextInput) {
-        return this.post("/api/classical/columnar/encrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/columnar/encrypt", data)
     }
     async columnarDecrypt(data: KeyTextInput) {
-        return this.post("/api/classical/columnar/decrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/columnar/decrypt", data)
     }
 
     async caesarDecrypt(data: CaesarInput) {
-        return this.post("/api/classical/caesar/decrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/caesar/decrypt", data)
     }
     async vigenereDecrypt(data: KeyTextInput) {
-        return this.post("/api/classical/vigenere/decrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/vigenere/decrypt", data)
     }
     async playfairDecrypt(data: KeyTextInput) {
-        return this.post("/api/classical/playfair/decrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/playfair/decrypt", data)
     }
     async railfenceDecrypt(data: CaesarInput) {
-        return this.post("/api/classical/railfence/decrypt", data)
+        return this.post<CryptoActionResult>("/api/classical/railfence/decrypt", data)
     }
 
 
     // --- Méthodes "Hashing" ---
     async hashSha256(data: TextInput) {
-        return this.post("/api/hash/sha256", data)
+        return this.post<CryptoActionResult>("/api/hash/sha256", data)
     }
     async hashBcrypt(data: TextInput) {
-        return this.post("/api/hash/bcrypt", data)
+        return this.post<CryptoActionResult>("/api/hash/bcrypt", data)
     }
     async bcryptVerify(data: BcryptVerifyInput) {
-        return this.post("/api/hash/bcrypt/verify", data)
+        return this.post<CryptoActionResult>("/api/hash/bcrypt/verify", data)
     }
 
     // --- Méthodes "Modern Symmetric" ---
     async aesEncrypt(data: AesInput) {
-        return this.post("/api/modern/aes/encrypt", data)
+        return this.post<CryptoActionResult>("/api/modern/aes/encrypt", data)
     }
     async aesDecrypt(data: AesDecryptInput) {
-        return this.post("/api/modern/aes/decrypt", data)
+        return this.post<CryptoActionResult>("/api/modern/aes/decrypt", data)
     }
     async desEncrypt(data: DesInput) {
-        return this.post("/api/modern/des/encrypt", data)
+        return this.post<CryptoActionResult>("/api/modern/des/encrypt", data)
     }
     async desDecrypt(data: DesDecryptInput) {
-        return this.post("/api/modern/des/decrypt", data)
+        return this.post<CryptoActionResult>("/api/modern/des/decrypt", data)
     }
 
     // --- Méthodes "Asymmetric" ---
     async rsaGenerateKeys() {
-        return this.get("/api/asymmetric/rsa/generate-keys")
+        return this.get<CryptoActionResult>("/api/asymmetric/rsa/generate-keys")
     }
     async rsaEncrypt(data: RsaEncryptInput) {
-        return this.post("/api/asymmetric/rsa/encrypt", data)
+        return this.post<CryptoActionResult>("/api/asymmetric/rsa/encrypt", data)
     }
     async rsaDecrypt(data: RsaDecryptInput) {
-        return this.post("/api/asymmetric/rsa/decrypt", data)
+        return this.post<CryptoActionResult>("/api/asymmetric/rsa/decrypt", data)
     }
 
     // --- Méthodes "Simulation" ---
-    async simulate(algo: string, data: any) {
-        return this.post(`/api/simulate/${algo}`, data)
+    async simulate(algo: string, data: Record<string, unknown>) {
+        return this.post<SimulationTrace>(`/api/simulate/${algo}`, data)
     }
 }
 

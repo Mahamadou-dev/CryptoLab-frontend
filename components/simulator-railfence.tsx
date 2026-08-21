@@ -8,24 +8,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, Lock, Unlock, Play } from "lucide-react"
+import { Loader2, Lock, Unlock, Play } from "lucide-react"
 // --- AJOUT I18N ---
-import { useTranslation, Language } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import {useLanguage} from "@/lib/language-context";
+import type { SimulationTrace, CryptoActionResult } from "@/lib/api-client"
 
 // ... (interface inchangée) ...
 interface SimulatorRailfenceProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
 }
 
 export function SimulatorRailfence({
-                                       setSimResult,
-                                       setFinalOutput,
+                                       setSimResult: _setSimResult,
+                                       setFinalOutput: _setFinalOutput,
                                        clearResults,
                                        onSimulationStart,
                                        onSimulationEnd,
@@ -55,7 +56,7 @@ export function SimulatorRailfence({
             return
         }
 
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute("railfence", action, {
                 text: text,
@@ -63,9 +64,9 @@ export function SimulatorRailfence({
             })
             apiResponse = response
 
-            if (action === 'encrypt') {
+            if (action === 'encrypt' && response.cipher) {
                 setText(response.cipher)
-            } else {
+            } else if (response.plain) {
                 setText(response.plain)
             }
 
@@ -85,8 +86,8 @@ export function SimulatorRailfence({
             return
         }
 
-        let simResponse = null
-        let encryptResponse = null
+        let simResponse: SimulationTrace | null = null
+        let encryptResponse: CryptoActionResult | null = null
         try {
             const apiData = { text: text, shift: depthNum }
 
@@ -97,7 +98,7 @@ export function SimulatorRailfence({
 
             simResponse = simData
             encryptResponse = encryptData
-            setText(encryptData.cipher)
+            if (encryptData.cipher) setText(encryptData.cipher)
 
         } catch (error) {
             console.error(error)

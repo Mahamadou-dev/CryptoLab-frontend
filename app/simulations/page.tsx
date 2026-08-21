@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react"
 import { Navigation } from "@/components/navigation"
-import { PageHeader } from "@/components/page-header"
 import { AlgorithmCategory } from "@/components/algorithm-category"
 import { algorithms, categoryInfo, AlgorithmType } from "@/lib/algorithms"
 import { useLanguage } from "@/lib/language-context"

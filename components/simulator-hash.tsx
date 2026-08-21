@@ -7,29 +7,29 @@ import { useCryptoAction } from "@/lib/api-hooks" // On utilise le hook d'action
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, CheckCircle, Play } from "lucide-react"
+import { Loader2, Zap, CheckCircle } from "lucide-react"
 // --- AJOUT I18N ---
-import { useTranslation, Language } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import {useLanguage} from "@/lib/language-context";
+import type { SimulationTrace, CryptoActionResult } from "@/lib/api-client"
 
 /**
  * Interface pour les props (maintenant identique aux autres)
  */
 interface SimulatorHashProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
     algoId: string // Reçoit "sha256" ou "bcrypt"
 }
 
 export function SimulatorHash({
-                                  setSimResult,
-                                  setFinalOutput,
+                                  setSimResult: _setSimResult,
+                                  setFinalOutput: _setFinalOutput,
                                   clearResults,
                                   onSimulationStart,
                                   onSimulationEnd,
@@ -48,7 +48,6 @@ export function SimulatorHash({
     // --- Notre Hook API (ne reçoit plus 'result') ---
     const {
         execute,
-        loading: actionLoading,
         error: actionError,
     } = useCryptoAction()
 
@@ -59,11 +58,11 @@ export function SimulatorHash({
     const handleHash = async () => {
         clearResults()
         onSimulationStart()
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute(algoId, "hash", { text })
             apiResponse = response
-            if (algoId === 'bcrypt') {
+            if (algoId === 'bcrypt' && response.hash) {
                 setHashedText(response.hash) // Sauvegarde pour la vérification
             }
         } catch (error) {
@@ -80,7 +79,7 @@ export function SimulatorHash({
         }
         clearResults()
         onSimulationStart()
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             // L'action est "verify"
             const response = await execute(algoId, "verify", { text, hashed_text: hashedText })

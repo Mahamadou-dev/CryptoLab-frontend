@@ -57,11 +57,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const [mounted, setMounted] = useState(false)
 
-    /** 🧠 Chargement initial depuis localStorage **/
+    /**
+     * 🧠 Chargement initial depuis localStorage.
+     *
+     * `localStorage` n'existe pas côté serveur : le premier rendu client doit
+     * donc rester identique au rendu serveur (sinon erreur d'hydratation), et
+     * c'est seulement une fois monté qu'on peut lire le stockage réel et
+     * synchroniser l'état React avec ce système externe.
+     */
     useEffect(() => {
         const storedTheme = (localStorage.getItem("theme") as Theme | null) || "system"
         const storedColor = (localStorage.getItem("colorTheme") as ColorTheme | null) || "gemini"
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronise React avec localStorage, lisible seulement après montage
         setThemeState(storedTheme)
         setColorThemeState(storedColor)
         setResolvedTheme(storedTheme === "system" ? getSystemTheme() : storedTheme)
@@ -77,6 +85,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         // 1. Déterminer le thème résolu
         const currentResolved = theme === "system" ? getSystemTheme() : theme
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronise l'état résolu avec le DOM/le système, ci-dessous
         setResolvedTheme(currentResolved) // Mettre à jour l'état
 
         // 2. Application du mode (dark/light)

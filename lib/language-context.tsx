@@ -13,12 +13,13 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    // Synchronise React avec localStorage/la langue du navigateur : lisibles
+    // seulement côté client, donc après le premier rendu.
     const stored = localStorage.getItem("language") as Language | null
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronise React avec localStorage, lisible seulement après montage
       setLanguageState(stored)
     } else {
       const browserLang = navigator.language.split("-")[0]

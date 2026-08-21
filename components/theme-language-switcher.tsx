@@ -29,6 +29,9 @@ export function ThemeLanguageSwitcher() {
     const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
+        // Le rendu dépend de `window.matchMedia`, absent côté serveur : on ne
+        // peut décider l'icône qu'après montage, pour éviter un mismatch d'hydratation.
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronise avec l'environnement client (matchMedia)
         setIsMounted(true)
     }, [])
 

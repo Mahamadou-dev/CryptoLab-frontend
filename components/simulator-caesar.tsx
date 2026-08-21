@@ -9,21 +9,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, Lock, Unlock, Play } from "lucide-react"
+import { Loader2, Lock, Unlock, Play } from "lucide-react"
+import type { CryptoActionResult, SimulationTrace } from "@/lib/api-client"
 
 // ... (interface inchangée) ...
 interface SimulatorCaesarProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
 }
 
 export function SimulatorCaesar({
-                                    setSimResult,
-                                    setFinalOutput,
                                     clearResults,
                                     onSimulationStart,
                                     onSimulationEnd,
@@ -48,18 +47,18 @@ export function SimulatorCaesar({
             return
         }
 
-        let apiResponse = null
+        let apiResponse: CryptoActionResult | null = null
         try {
             const response = await execute("caesar", action, {
                 text: text,
                 shift: shiftNum,
             })
-            apiResponse = response
+            apiResponse = response ?? null
 
             if (action === 'encrypt') {
-                setText(response.cipher)
+                setText(response?.cipher ?? text)
             } else {
-                setText(response.plain)
+                setText(response?.plain ?? text)
             }
 
         } catch (error) {
@@ -78,8 +77,8 @@ export function SimulatorCaesar({
             return
         }
 
-        let simResponse = null
-        let encryptResponse = null
+        let simResponse: SimulationTrace | null = null
+        let encryptResponse: CryptoActionResult | null = null
         try {
             const apiData = { text: text, shift: shiftNum }
 
@@ -89,8 +88,8 @@ export function SimulatorCaesar({
             ]);
 
             simResponse = simData
-            encryptResponse = encryptData
-            setText(encryptData.cipher)
+            encryptResponse = encryptData ?? null
+            setText(encryptData?.cipher ?? text)
 
         } catch (error) {
             console.error(error)
@@ -178,7 +177,7 @@ export function SimulatorCaesar({
             {/* REMARQUE : Alerte d'erreur stylisée */}
             {error && (
                 <Alert variant="destructive" className="glass border-[var(--color-rose)]/50 text-[var(--color-rose)]">
-                    <AlertTitle>Erreur de l'API</AlertTitle>
+                    <AlertTitle>Erreur de l&apos;API</AlertTitle>
                     <AlertDescription className="break-all">{`${error}`}</AlertDescription>
                 </Alert>
             )}

@@ -20,7 +20,7 @@ interface LearnCardProps {
     className?: string
 }
 
-export function LearnCard({ id, title, excerpt, category, icon, href, className }: LearnCardProps) {
+export function LearnCard({ id: _id, title, excerpt, category, icon, href, className }: LearnCardProps) {
     const { language } = useLanguage()
     const t = useTranslation(language)
 

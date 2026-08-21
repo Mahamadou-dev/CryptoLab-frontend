@@ -1,12 +1,21 @@
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect, useRef } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, Text3D, Center, Plane } from "@react-three/drei"
 import { Vector3, Mesh } from "three"
+import type { SimulationTrace } from "@/lib/api-client"
 
 const FONT_URL = "/fonts/helvetiker_bold.typeface.json"
 const FONT_PROPS = { font: FONT_URL, size: 0.6, height: 0.1 }
+
+/** Une étape brute de la trace `/api/simulate/railfence`. */
+interface RailfenceStep {
+    phase?: string
+    current_pos?: [number, number]
+    intermediate_result?: string
+    description: string
+}
 
 // --------------------- GRILLE STATIQUE ---------------------
 const StaticGrid = React.memo(({ matrix, offsets }: { matrix: string[][], offsets: { x: number, y: number } }) => {
@@ -134,26 +143,24 @@ const IOTexts = React.memo(
 IOTexts.displayName = "IOTexts"
 
 // --------------------- SCÈNE PRINCIPALE ---------------------
-function Scene({ simulationData }: { simulationData: any }) {
+function Scene({ simulationData }: { simulationData: SimulationTrace | null }) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0)
     const [phase, setPhase] = useState<"Écriture" | "Lecture">("Écriture")
 
-    const { viewport } = useThree()
-
-    const { matrix, writeSteps, readSteps, fullInput, fullOutput } = useMemo(() => {
+    const { matrix, writeSteps, readSteps, fullInput } = useMemo(() => {
         if (!simulationData?.steps?.length) {
-            return { matrix: null, writeSteps: [], readSteps: [], fullInput: "", fullOutput: "" }
+            return { matrix: null as string[][] | null, writeSteps: [] as RailfenceStep[], readSteps: [] as RailfenceStep[], fullInput: "" }
         }
 
-        const matrix = simulationData.matrix || []
-        const writeSteps = simulationData.steps.filter((s: any) => s.phase === "Écriture")
-        const readSteps = simulationData.steps.filter((s: any) => s.phase === "Lecture")
+        const steps = simulationData.steps as RailfenceStep[]
+        const matrix = (simulationData.matrix as string[][] | undefined) || []
+        const writeSteps = steps.filter((s) => s.phase === "Écriture")
+        const readSteps = steps.filter((s) => s.phase === "Lecture")
         return {
             matrix,
             writeSteps,
             readSteps,
-            fullInput: simulationData.input_text || "",
-            fullOutput: simulationData.final_result || "",
+            fullInput: (simulationData.input_text as string | undefined) || "",
         }
     }, [simulationData])
 
@@ -217,16 +224,16 @@ function Scene({ simulationData }: { simulationData: any }) {
 
     if (phase === "Écriture") {
         activeStep = writeSteps[currentStepIndex]
-        if (activeStep) {
+        if (activeStep?.current_pos) {
             activePos = [activeStep.current_pos[0], activeStep.current_pos[1]]
             inputIndex = currentStepIndex
         }
     } else {
         const readIndex = currentStepIndex - writeSteps.length
         activeStep = readSteps[readIndex]
-        if (activeStep) {
+        if (activeStep?.current_pos) {
             activePos = [activeStep.current_pos[0], activeStep.current_pos[1]]
-            currentOutput = activeStep.intermediate_result
+            currentOutput = activeStep.intermediate_result ?? ""
             inputIndex = fullInput.length
         }
     }
@@ -253,7 +260,7 @@ function Scene({ simulationData }: { simulationData: any }) {
 }
 
 // --------------------- COMPOSANT PRINCIPAL ---------------------
-export function RailFenceViz({ simulationData }: { simulationData: any }) {
+export function RailFenceViz({ simulationData }: { simulationData: SimulationTrace | null }) {
     return (
         <Canvas camera={{ position: [0, 0, 25], fov: 50 }}>
             <ambientLight intensity={1.2} />

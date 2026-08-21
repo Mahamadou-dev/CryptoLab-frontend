@@ -74,5 +74,9 @@ export function useThreeScene({ onSceneReady, backgroundColor = 0x000000, backgr
     }
   }, [backgroundColor, backgroundAlpha, onSceneReady, cleanup])
 
-  return { containerRef, scene: sceneRef.current, camera: cameraRef.current, renderer: rendererRef.current }
+  // Les refs elles-mêmes sont renvoyées, jamais leur `.current` : le dérouler
+  // ici figerait la valeur au moment de ce rendu, avant même que l'effet
+  // n'ait construit la scène. L'appelant les déréférence dans un effet ou un
+  // gestionnaire d'événement, jamais pendant son propre rendu.
+  return { containerRef, sceneRef, cameraRef, rendererRef }
 }

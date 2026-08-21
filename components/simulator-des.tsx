@@ -8,24 +8,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Loader2, Zap, Lock, Unlock, Play } from "lucide-react"
+import { Loader2, Unlock, Play } from "lucide-react"
 // --- AJOUT I18N ---
-import { useTranslation, Language } from "@/lib/i18n"
+import { useTranslation } from "@/lib/i18n"
 import {useLanguage} from "@/lib/language-context";
+import type { SimulationTrace, CryptoActionResult } from "@/lib/api-client"
 
 // ... (interface inchangée) ...
 interface SimulatorDesProps {
-    setSimResult: (result: any) => void
-    setFinalOutput: (result: any) => void
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
     clearResults: () => void
     onSimulationStart: () => void
-    onSimulationEnd: (result: any, output: any) => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
     isSimulating: boolean
 }
 
 export function SimulatorDes({
-                                 setSimResult,
-                                 setFinalOutput,
+                                 setSimResult: _setSimResult,
+                                 setFinalOutput: _setFinalOutput,
                                  clearResults,
                                  onSimulationStart,
                                  onSimulationEnd,
@@ -42,8 +43,8 @@ export function SimulatorDes({
     const [iv, setIv] = useState("")
     const [cipherText, setCipherText] = useState("")
 
-    const { simulate, loading: simLoading, error: simError } = useSimulate()
-    const { execute, loading: actionLoading, error: actionError } = useCryptoAction()
+    const { simulate, error: simError } = useSimulate()
+    const { execute, error: actionError } = useCryptoAction()
 
     const isLoading = isSimulating
 

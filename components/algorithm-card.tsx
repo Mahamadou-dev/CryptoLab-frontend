@@ -30,7 +30,7 @@ interface AlgorithmCardProps {
 }
 
 export function AlgorithmCard({
-                                  id,
+                                  id: _id,
                                   name,
                                   description,
                                   difficulty,

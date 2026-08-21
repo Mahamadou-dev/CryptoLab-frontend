@@ -25,7 +25,6 @@ import {
     Zap,
     Info,
     Layers,
-    Palette,
     Expand,
     X,
 } from "lucide-react"
@@ -49,24 +48,42 @@ import { PlayfairViz } from "@/components/3d/playfair-viz"
 // @ts-ignore
 import { DesViz } from "@/components/3d/des-viz"
 import {RailFenceViz} from "@/components/3d/railfence-viz";
+import type { SimulationTrace, CryptoActionResult } from "@/lib/api-client"
 
+/** Contrat commun a tous les composants `simulator-*.tsx`. */
+interface SimulatorProps {
+    setSimResult: (result: SimulationTrace | null) => void
+    setFinalOutput: (result: CryptoActionResult | null) => void
+    clearResults: () => void
+    onSimulationStart: () => void
+    onSimulationEnd: (result: SimulationTrace | null, output: CryptoActionResult | null) => void
+    isSimulating: boolean
+}
+
+/** Une etape de trace, telle que servie par `/api/simulate/*` — le detail exact varie par algorithme. */
+interface SimulationStep {
+    step?: number
+    description: string
+    intermediate_result?: string
+    [key: string]: unknown
+}
 
 // --- CARTES DE ROUTAGE ---
 // ... (Logique inchangée) ...
-const simulatorMap: Record<string, React.ComponentType<any>> = {
+const simulatorMap: Record<string, React.ComponentType<SimulatorProps>> = {
     caesar: SimulatorCaesar,
     vigenere: SimulatorVigenere,
     playfair: SimulatorPlayfair,
     railfence: SimulatorRailfence,
-    sha256: (props: any) => <SimulatorHash {...props} algoId="sha256" />,
-    bcrypt: (props: any) => <SimulatorHash {...props} algoId="bcrypt" />,
+    sha256: (props: SimulatorProps) => <SimulatorHash {...props} algoId="sha256" />,
+    bcrypt: (props: SimulatorProps) => <SimulatorHash {...props} algoId="bcrypt" />,
     des: SimulatorDes,
     aes: SimulatorAes,
     rsa: SimulatorRsa,
 
 }
 
-const vizMap: Record<string, React.ComponentType<any>> = {
+const vizMap: Record<string, React.ComponentType<{ simulationData: SimulationTrace | null }>> = {
     caesar: CaesarViz,
     vigenere: VigenereViz,
     playfair: PlayfairViz,
@@ -75,6 +92,20 @@ const vizMap: Record<string, React.ComponentType<any>> = {
 }
 
 // ... (Logique inchangée) ...
+/** Premier champ texte pertinent d'un résultat, quel que soit l'algorithme — sinon la structure entière, pour ne rien perdre. */
+function formatFinalOutput(output: CryptoActionResult): string {
+    const candidates = [
+        output.cipher_hex,
+        output.cipher,
+        output.plain,
+        output.hash,
+        output.final_result_hex,
+        output.final_result,
+    ]
+    const found = candidates.find((value): value is string => typeof value === "string")
+    return found ?? JSON.stringify(output)
+}
+
 function parseStepDescription(desc: string) {
     if (!desc) return { title: "Étape invalide", details: [] } // Laissé en dur, car c'est un fallback d'erreur
     const lines = desc.split("\n").map((line) => line.trim())
@@ -87,8 +118,8 @@ export default function SimulatorPage() {
     const { language } = useLanguage()
     const t = useTranslation(language)
 
-    const [simResult, setSimResult] = useState<any>(null)
-    const [finalOutput, setFinalOutput] = useState<any>(null)
+    const [simResult, setSimResult] = useState<SimulationTrace | null>(null)
+    const [finalOutput, setFinalOutput] = useState<CryptoActionResult | null>(null)
     const [isSimulating, setIsSimulating] = useState(false)
     const [isVizFullscreen, setIsVizFullscreen] = useState(false)
 
@@ -157,7 +188,7 @@ export default function SimulatorPage() {
         setIsSimulating(true)
     }
 
-    const handleSimulationEnd = (result: any, output: any) => {
+    const handleSimulationEnd = (result: SimulationTrace | null, output: CryptoActionResult | null) => {
         setSimResult(result)
         setFinalOutput(output)
         setIsSimulating(false)
@@ -342,13 +373,7 @@ export default function SimulatorPage() {
                                     <div className="relative">
                                         {/* REMARQUE : Style du bloc de code mis à jour */}
                                         <code className="block w-full rounded-xl bg-[var(--surface)] p-6 text-lg font-mono font-bold text-[var(--color-rose)] break-words border border-[var(--border-color)]">
-                                            {finalOutput.cipher_hex ||
-                                                finalOutput.cipher ||
-                                                finalOutput.plain ||
-                                                finalOutput.hash ||
-                                                finalOutput.final_result_hex ||
-                                                finalOutput.final_result ||
-                                                JSON.stringify(finalOutput)}
+                                            {formatFinalOutput(finalOutput)}
                                         </code>
                                         <div className="absolute top-3 right-3 w-3 h-3 bg-[var(--color-rose)] rounded-full animate-pulse" />
                                     </div>
@@ -407,7 +432,9 @@ export default function SimulatorPage() {
                                 {simResult && simResult.steps ? (
                                     <ScrollArea className="h-[500px] w-full">
                                         <div className="space-y-3 pr-4">
-                                            {simResult.steps.map((step: any, index: number) => {
+                                            {(() => {
+                                                const steps = simResult.steps as SimulationStep[]
+                                                return steps.map((step, index) => {
                                                 const { title: descTitle, details } = parseStepDescription(
                                                     step.description,
                                                 )
@@ -415,7 +442,7 @@ export default function SimulatorPage() {
                                                     step.step !== undefined ? step.step : index
                                                 const isInit = stepNumber === 0
                                                 const isFinal =
-                                                    stepNumber === simResult.steps.length - 1
+                                                    stepNumber === steps.length - 1
 
                                                 // Traduction du titre
                                                 const title = isFinal
@@ -486,7 +513,8 @@ export default function SimulatorPage() {
                                                         </div>
                                                     </div>
                                                 )
-                                            })}
+                                                })
+                                            })()}
                                         </div>
                                     </ScrollArea>
                                 ) : (

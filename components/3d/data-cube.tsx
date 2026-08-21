@@ -79,10 +79,14 @@ export function DataCube({ rotationSpeed = 0.005, size = 2, color = 0xb8336a }: 
 
         window.addEventListener("resize", handleResize)
 
+        // Copié au moment du montage : au démontage, `containerRef.current`
+        // peut déjà valoir `null` (React l'efface avant d'exécuter le nettoyage).
+        const container = containerRef.current
+
         return () => {
             window.removeEventListener("resize", handleResize)
-            if (containerRef.current?.contains(renderer.domElement)) {
-                containerRef.current.removeChild(renderer.domElement)
+            if (container?.contains(renderer.domElement)) {
+                container.removeChild(renderer.domElement)
             }
             renderer.dispose()
         }

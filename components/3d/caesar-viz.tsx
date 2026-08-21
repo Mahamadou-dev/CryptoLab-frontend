@@ -9,14 +9,27 @@ import {
     Float,
 } from "@react-three/drei"
 import { Suspense, useMemo, useState, useEffect, useRef } from "react"
-import { Vector3, Group, Mesh, Color, Points, BufferGeometry, Float32BufferAttribute, MeshStandardMaterial, CylinderGeometry, TorusGeometry, BoxGeometry } from "three"
+import { Vector3, Group, Mesh, Color, Points, BufferGeometry, Float32BufferAttribute, MeshStandardMaterial } from "three"
 import * as THREE from "three"
 // --- AJOUT I18N ---
 import { useTranslation } from "@/lib/i18n"
 import { useLanguage } from "@/lib/language-context"
+import type { SimulationTrace } from "@/lib/api-client"
 
 const FONT_URL = "/fonts/helvetiker_bold.typeface.json"
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+/** Étape de trace propre à César : une lettre d'entrée devient une lettre décalée. */
+interface CaesarStep {
+    current_char?: string
+    output_char?: string
+    description?: string
+}
+
+function isCaesarStep(step: unknown): step is Required<Pick<CaesarStep, "current_char" | "output_char">> {
+    const s = step as CaesarStep
+    return Boolean(s?.current_char && s?.output_char)
+}
 
 // --- HOOK D'OPTIMISATION ---
 function usePerformanceOptimization() {
@@ -60,8 +73,15 @@ interface MagicParticlesProps {
 
 function MagicParticles({ position, color, count = 15 }: MagicParticlesProps) {
     const particlesRef = useRef<Points>(null!)
-    const { geometry } = useMemo(() => {
-        const geometry = new BufferGeometry()
+    // Géométrie mutable détenue par une ref : Three.js mute ses tableaux
+    // typés image par image pour la performance, un usage imperatif que le
+    // modèle de pureté de React ne prévoit pas — c'est le cas d'usage documenté
+    // de `useRef` (stocker une valeur mutable non liée au rendu). Elle n'est
+    // jamais lue pendant le rendu React lui-même : `<primitive>` la reçoit via
+    // une ref de rappel, pas en la dereferençant dans le JSX.
+    const geometryRef = useRef<BufferGeometry>(new BufferGeometry())
+
+    useEffect(() => {
         const positions = new Float32Array(count * 3)
         const sizes = new Float32Array(count)
 
@@ -72,16 +92,16 @@ function MagicParticles({ position, color, count = 15 }: MagicParticlesProps) {
             sizes[i] = Math.random() * 0.05 + 0.02
         }
 
-        geometry.setAttribute('position', new Float32BufferAttribute(positions, 3))
-        geometry.setAttribute('size', new Float32BufferAttribute(sizes, 1))
-
-        return { geometry }
+        geometryRef.current.setAttribute('position', new Float32BufferAttribute(positions, 3))
+        geometryRef.current.setAttribute('size', new Float32BufferAttribute(sizes, 1))
     }, [count])
 
     useFrame(({ clock }) => {
         if (!particlesRef.current) return
 
-        const positions = geometry.attributes.position.array as Float32Array
+        const positionAttr = geometryRef.current.attributes.position as THREE.BufferAttribute | undefined
+        if (!positionAttr) return
+        const positions = positionAttr.array as Float32Array
         const time = clock.getElapsedTime()
 
         for (let i = 0; i < count; i++) {
@@ -94,12 +114,13 @@ function MagicParticles({ position, color, count = 15 }: MagicParticlesProps) {
             positions[iz] += Math.sin(time * 0.9 + i) * 0.003
         }
 
-        geometry.attributes.position.needsUpdate = true
+        positionAttr.needsUpdate = true
     })
 
     return (
         <points ref={particlesRef} position={position}>
-            <primitive object={geometry} />
+            {/* eslint-disable-next-line react-hooks/refs -- geometrie Three.js mutee hors-rendu, jamais reassignee ; lecture de `.current` inevitable pour `<primitive>` */}
+            <primitive object={geometryRef.current} />
             <pointsMaterial
                 size={0.06}
                 color={color}
@@ -262,42 +283,39 @@ function PadlockModel({ isActive }: PadlockModelProps) {
 
 // --- ALPHABET ÉLÉGANT ---
 interface AlphabetDisplayProps {
-    simulationData: any;
+    simulationData: SimulationTrace | null;
     currentStepIndex: number;
 }
 
 function AlphabetDisplay({ simulationData, currentStepIndex }: AlphabetDisplayProps) {
     const lettersRef = useRef<Group>(null!)
-    const [activeIndices, setActiveIndices] = useState<Set<number>>(new Set())
 
     const { activeChar, shiftedChar } = useMemo(() => {
         if (!simulationData?.steps?.length) return { activeChar: null, shiftedChar: null }
 
-        const letterSteps = simulationData.steps.filter((s: any) => s.current_char && s.output_char)
+        const letterSteps = simulationData.steps.filter(isCaesarStep)
         const currentStep = letterSteps[currentStepIndex]
 
         if (!currentStep) return { activeChar: null, shiftedChar: null }
 
         return {
-            activeChar: currentStep.current_char?.toUpperCase(),
-            shiftedChar: currentStep.output_char?.toUpperCase(),
+            activeChar: currentStep.current_char?.toUpperCase() ?? null,
+            shiftedChar: currentStep.output_char?.toUpperCase() ?? null,
         }
     }, [simulationData, currentStepIndex])
 
-    useEffect(() => {
-        const newActiveIndices = new Set<number>()
-
+    // Dérivé directement du rendu courant : pas besoin d'état ni d'effet.
+    const activeIndices = useMemo(() => {
+        const indices = new Set<number>()
         if (activeChar) {
             const startIndex = ALPHABET.indexOf(activeChar)
-            if (startIndex !== -1) newActiveIndices.add(startIndex)
+            if (startIndex !== -1) indices.add(startIndex)
         }
-
         if (shiftedChar) {
             const endIndex = ALPHABET.indexOf(shiftedChar)
-            if (endIndex !== -1) newActiveIndices.add(endIndex)
+            if (endIndex !== -1) indices.add(endIndex)
         }
-
-        setActiveIndices(newActiveIndices)
+        return indices
     }, [activeChar, shiftedChar])
 
     useFrame(({ clock }) => {
@@ -356,20 +374,21 @@ function AlphabetDisplay({ simulationData, currentStepIndex }: AlphabetDisplayPr
 
 // --- TEXTES MINIMALISTES ---
 interface IOTextsProps {
-    simulationData: any;
+    simulationData: SimulationTrace | null;
     currentStepIndex: number;
-    t: (key: string, vars?: any) => string; // Ajout du traducteur
+    t: ReturnType<typeof useTranslation>; // Ajout du traducteur
 }
 
 function IOTexts({ simulationData, currentStepIndex, t }: IOTextsProps) {
     const { plainText, cipherText } = useMemo(() => {
         if (!simulationData?.steps?.length) return { plainText: "", cipherText: "" }
 
-        const originalText = simulationData.steps[0].description.match(/'([^']+)'/)?.[1] || ""
+        const firstStep = simulationData.steps[0] as CaesarStep
+        const originalText = firstStep.description?.match(/'([^']+)'/)?.[1] || ""
         const plainToShow = originalText.substring(0, currentStepIndex + 1)
 
-        const letterSteps = simulationData.steps.filter((s: any) => s.current_char && s.output_char)
-        const cipherToShow = letterSteps.slice(0, currentStepIndex + 1).map((s: any) => s.output_char).join('')
+        const letterSteps = simulationData.steps.filter(isCaesarStep)
+        const cipherToShow = letterSteps.slice(0, currentStepIndex + 1).map((s) => s.output_char).join('')
 
         return { plainText: plainToShow, cipherText: cipherToShow }
     }, [simulationData, currentStepIndex])
@@ -489,26 +508,39 @@ function AnimatedLetter({ charIn, charOut, index, onComplete }: AnimatedLetterPr
 
 // --- SCÈNE ÉLÉGANTE ---
 interface SceneProps {
-    simulationData: any;
+    simulationData: SimulationTrace | null;
 }
 
 function Scene({ simulationData }: SceneProps) {
     const { language } = useLanguage()
     const t = useTranslation(language)
 
-    const [stepIndex, setStepIndex] = useState(0)
-    const [isRunning, setIsRunning] = useState(false)
-    const quality = usePerformanceOptimization()
-
+    // Initialisés depuis `simulationData` : calculer la valeur de depart au
+    // premier rendu (plutot qu'a 0 puis corriger en effet) evite un rendu
+    // intercalaire et le `setState` synchrone que la regle interdit.
     const letterSteps = useMemo(() => {
         if (!simulationData?.steps?.length) return []
-        return simulationData.steps.filter((s: any) => s.current_char && s.output_char)
+        return simulationData.steps.filter(isCaesarStep)
     }, [simulationData])
 
-    useEffect(() => {
+    const [stepIndex, setStepIndex] = useState(0)
+    const [isRunning, setIsRunning] = useState(letterSteps.length > 0)
+    const quality = usePerformanceOptimization()
+
+    // Reagit aux changements de simulation posterieurs au premier rendu. C'est
+    // le motif documente par React lui-meme ("Storing information from
+    // previous renders") : comparer une ref a une prop pendant le rendu, puis
+    // ajuster l'etat immediatement si elle a change. React re-execute le rendu
+    // avant de commiter, sans jamais peindre l'etat intermediaire — mais la
+    // regle experimentale du compilateur ne reconnait pas encore ce motif.
+    const previousData = useRef(simulationData)
+    /* eslint-disable react-hooks/refs -- lecture et ecriture de ref pendant le rendu, motif documente par React */
+    if (previousData.current !== simulationData) {
+        previousData.current = simulationData
         setStepIndex(0)
         setIsRunning(letterSteps.length > 0)
-    }, [simulationData, letterSteps.length])
+    }
+    /* eslint-enable react-hooks/refs */
 
     const handleLetterComplete = () => {
         if (stepIndex < letterSteps.length - 1) {
@@ -583,7 +615,7 @@ function LoadingFallback() {
 
 // --- COMPOSANT PRINCIPAL ---
 interface VizComponentProps {
-    simulationData: any;
+    simulationData: SimulationTrace | null;
 }
 
 export function CaesarViz({ simulationData }: VizComponentProps) {

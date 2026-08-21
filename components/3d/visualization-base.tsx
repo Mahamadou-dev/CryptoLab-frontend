@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import * as THREE from "three"
 
 interface VisualizationBaseProps {
@@ -22,7 +22,6 @@ export function VisualizationBase({
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
     const animationIdRef = useRef<number | null>(null)
     const cleanupRef = useRef<(() => void) | null>(null)
-    const [isReady, setIsReady] = useState(false)
 
     useEffect(() => {
         if (!containerRef.current) return
@@ -52,8 +51,6 @@ export function VisualizationBase({
         // Call setup function
         cleanupRef.current = setup(scene, camera) || null
 
-        setIsReady(true)
-
         // Animation loop
         const animate = () => {
             animationIdRef.current = requestAnimationFrame(animate)
@@ -74,15 +71,19 @@ export function VisualizationBase({
 
         window.addEventListener("resize", handleResize)
 
+        // Copié au moment du montage : au démontage, `containerRef.current`
+        // peut déjà valoir `null` (React l'efface avant d'exécuter le nettoyage).
+        const container = containerRef.current
+
         return () => {
             window.removeEventListener("resize", handleResize)
             if (cleanupRef.current) cleanupRef.current()
             if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current)
-            if (rendererRef.current && containerRef.current) {
+            if (rendererRef.current && container) {
                 try {
-                    containerRef.current.removeChild(rendererRef.current.domElement)
-                } catch (e) {
-                    // Already removed
+                    container.removeChild(rendererRef.current.domElement)
+                } catch {
+                    // Déjà retiré du DOM.
                 }
                 rendererRef.current.dispose()
             }

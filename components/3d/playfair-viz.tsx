@@ -2,7 +2,7 @@
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect, useRef } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber"
 import {
     OrbitControls,
     Text3D,
@@ -10,14 +10,34 @@ import {
     Plane,
     Line,
 } from "@react-three/drei"
-import { Group, Vector3, Color } from "three"
-import * as THREE from "three"
+import { Vector3 } from "three"
 // --- AJOUT I18N ---
 import { useTranslation } from "@/lib/i18n"
 import { useLanguage } from "@/lib/language-context"
+import type { SimulationTrace } from "@/lib/api-client"
 
 // Assurez-vous que ce fichier existe bien dans /public/fonts/
 const FONT_URL = "/fonts/helvetiker_bold.typeface.json"
+
+/** Une étape brute de la trace `/api/simulate/playfair` — le detail exact varie par phase. */
+interface RawStep {
+    phase?: string
+    matrix?: string[][]
+    intermediate_result?: string
+    input_digram?: string
+    output_digram?: string
+    description: string
+}
+
+/** Digramme de chiffrement, une fois la description de l'étape analysée. */
+interface EncryptionStep {
+    in: string
+    out: string
+    result: string
+    coords: { in: [number, number][]; out: [number, number][] }
+    ruleKey: string
+    rule: string
+}
 
 // --- COMPOSANT 1: GRILLE STATIQUE ---
 const StaticGrid = React.memo(({ matrix }: { matrix: string[][] }) => {
@@ -135,23 +155,23 @@ const IOTexts = React.memo(
          t, // Traducteur
      }: {
         digrams: string[]
-        currentStep: any
+        currentStep: EncryptionStep | undefined
         currentStepIndex: number
-        t: (key: string) => string
+        t: ReturnType<typeof useTranslation>
     }) => {
         const output = currentStep ? currentStep.result : ""
         const rule = currentStep ? currentStep.rule : t("viz.playfair.waiting")
 
         // Calcule la position X de départ pour chaque digramme
         const digramPositions = useMemo(() => {
-            let x = -12;
-            return digrams.map(d => {
-                const pos = x;
-                // Calcule la "largeur" du digramme + un espace
-                const width = (d.length * 0.6 * 0.8) + 0.7; // (taille * lettres * facteur) + espace
-                x += width;
-                return pos;
-            });
+            return digrams.reduce<{ positions: number[]; next: number }>(
+                (acc, d) => {
+                    // Calcule la "largeur" du digramme + un espace
+                    const width = (d.length * 0.6 * 0.8) + 0.7; // (taille * lettres * facteur) + espace
+                    return { positions: [...acc.positions, acc.next], next: acc.next + width }
+                },
+                { positions: [], next: -12 },
+            ).positions;
         }, [digrams]);
 
         return (
@@ -220,7 +240,7 @@ const IOTexts = React.memo(
 IOTexts.displayName = "IOTexts"
 
 // --- SCÈNE PRINCIPALE ---
-function Scene({ simulationData }: { simulationData: any }) {
+function Scene({ simulationData }: { simulationData: SimulationTrace | null }) {
     const { language } = useLanguage()
     const t = useTranslation(language)
 
@@ -229,26 +249,31 @@ function Scene({ simulationData }: { simulationData: any }) {
     // Parse les données une seule fois
     const { matrix, digrams, encryptionSteps } = useMemo(() => {
         if (!simulationData?.steps?.length) {
-            return { matrix: [], digrams: [], encryptionSteps: [] }
+            return { matrix: [] as string[][], digrams: [] as string[], encryptionSteps: [] as EncryptionStep[] }
         }
+        const steps = simulationData.steps as RawStep[]
 
-        const matrixStep = simulationData.steps.find(
-            (s: any) => s.phase === "Matrix Generation" && s.matrix,
+        const matrixStep = steps.find(
+            (s) => s.phase === "Matrix Generation" && s.matrix,
         )
-        const matrix = matrixStep ? matrixStep.matrix : []
+        const matrix = matrixStep?.matrix ?? []
 
         // S'assure de gérer les espaces dans les digrammes
-        const formatStep = simulationData.steps.find(
-            (s: any) => s.phase === "Message Formatting" && s.intermediate_result,
+        const formatStep = steps.find(
+            (s) => s.phase === "Message Formatting" && s.intermediate_result,
         )
         // Recrée les digrammes à partir du message formaté (qui inclut les espaces)
-        const digrams = formatStep
-            ? formatStep.intermediate_result.match(/(\S\S|\s)/g) || []
+        const digrams = formatStep?.intermediate_result
+            ? formatStep.intermediate_result.match(/(\S\S|\s)/g) ?? []
             : []
 
-        const encryptionSteps = simulationData.steps
-            .filter((s: any) => s.phase === "Encryption" && s.input_digram)
-            .map((s: any) => {
+        const encryptionSteps: EncryptionStep[] = steps
+            .filter((s) => s.phase === "Encryption" && s.input_digram)
+            .map((s) => {
+                const inputDigram = s.input_digram ?? ""
+                const outputDigram = s.output_digram ?? ""
+                const result = s.intermediate_result ?? ""
+
                 // Regex pour trouver " 'A' est en (R, C) "
                 const inRegex = /'([^']*)' est en \((-?\d+), (-?\d+)\)/g
                 const inMatches = [...s.description.matchAll(inRegex)]
@@ -259,29 +284,31 @@ function Scene({ simulationData }: { simulationData: any }) {
 
                 if (inMatches.length < 2 || outMatches.length < 2) {
                     // Gère les caractères non-valides (comme les espaces)
-                    if (s.input_digram.trim() === "") {
+                    if (inputDigram.trim() === "") {
                         return {
-                            in: s.input_digram, out: s.output_digram, result: s.intermediate_result,
-                            coords: { in: [], out: [], rule: "viz.playfair.spaceKept" },
+                            in: inputDigram, out: outputDigram, result,
+                            coords: { in: [], out: [] },
+                            ruleKey: "viz.playfair.spaceKept",
                             rule: t("viz.playfair.spaceKept"),
                         }
                     }
                     console.error("Impossible de parser la description:", s.description)
                     return {
-                        in: s.input_digram,
-                        out: s.output_digram,
-                        result: s.intermediate_result,
-                        coords: { in: [], out: [], rule: "viz.playfair.errorParsing" },
+                        in: inputDigram,
+                        out: outputDigram,
+                        result,
+                        coords: { in: [], out: [] },
+                        ruleKey: "viz.playfair.errorParsing",
                         rule: t("viz.playfair.errorParsing"),
                     }
                 }
 
-                const inCoords = [
+                const inCoords: [number, number][] = [
                     [parseInt(inMatches[0][2]), parseInt(inMatches[0][3])],
                     [parseInt(inMatches[1][2]), parseInt(inMatches[1][3])],
                 ]
 
-                const outCoords = [
+                const outCoords: [number, number][] = [
                     [parseInt(outMatches[0][2]), parseInt(outMatches[0][3])],
                     [parseInt(outMatches[1][2]), parseInt(outMatches[1][3])],
                 ]
@@ -307,9 +334,9 @@ function Scene({ simulationData }: { simulationData: any }) {
 
 
                 return {
-                    in: s.input_digram,
-                    out: s.output_digram,
-                    result: s.intermediate_result,
+                    in: inputDigram,
+                    out: outputDigram,
+                    result,
                     coords: { in: inCoords, out: outCoords },
                     ruleKey: ruleKey, // Envoie la clé
                     rule: rule, // Envoie la chaîne traduite
@@ -319,13 +346,20 @@ function Scene({ simulationData }: { simulationData: any }) {
         return { matrix, digrams, encryptionSteps }
     }, [simulationData, t]) // Ajout de 't' comme dépendance
 
+    // Repart de zéro chaque fois qu'une nouvelle trace arrive — comparaison à
+    // une ref pendant le rendu (motif documenté par React : "Storing
+    // information from previous renders"), pas dans un effet.
+    const previousSteps = useRef(encryptionSteps)
+    /* eslint-disable react-hooks/refs -- lecture et ecriture de ref pendant le rendu, motif documente par React */
+    if (previousSteps.current !== encryptionSteps) {
+        previousSteps.current = encryptionSteps
+        if (currentStepIndex !== 0) setCurrentStepIndex(0)
+    }
+    /* eslint-enable react-hooks/refs */
+
     // Logique de l'animation (boucle)
     useEffect(() => {
-        if (!encryptionSteps.length) {
-            setCurrentStepIndex(0)
-            return
-        }
-        // Nettoie l'intervalle précédent
+        if (!encryptionSteps.length) return
         const interval = setInterval(() => {
             setCurrentStepIndex(
                 (prevIndex) => (prevIndex + 1) % encryptionSteps.length,
@@ -382,7 +416,7 @@ function Scene({ simulationData }: { simulationData: any }) {
 }
 
 // --- COMPOSANT PRINCIPAL WRAPPER ---
-export function PlayfairViz({ simulationData }: { simulationData: any }) {
+export function PlayfairViz({ simulationData }: { simulationData: SimulationTrace | null }) {
     return (
         <Canvas camera={{ position: [0, 0, 25], fov: 50 }} gl={{ antialias: true }}>
             <ambientLight intensity={1.5} />

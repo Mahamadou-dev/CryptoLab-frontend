@@ -5,17 +5,16 @@ import { Canvas, useFrame } from "@react-three/fiber"
 import {
     OrbitControls,
     Text3D,
-    Center,
     RoundedBox,
     Cylinder,
     Torus,
 } from "@react-three/drei"
-import React, { Suspense, useMemo, useState, useEffect, useRef } from "react"
-import { Vector3, MathUtils, Group, Mesh } from "three"
-import * as THREE from "three"
+import React, { Suspense, useMemo, useState, useRef } from "react"
+import { Vector3, Group } from "three"
 // --- AJOUT I18N ---
 import { useTranslation } from "@/lib/i18n"
 import { useLanguage } from "@/lib/language-context"
+import type { SimulationTrace } from "@/lib/api-client"
 
 // Assurez-vous que ce fichier de police existe bien dans /public/fonts/
 const FONT_URL = "/fonts/helvetiker_bold.typeface.json"
@@ -62,7 +61,7 @@ function PadlockModel() {
 }
 
 // --- TEXTES ENTRÉE/SORTIE ---
-const IOTexts = React.memo(({ plainText, cipherText, t }: { plainText: string, cipherText: string, t: (key: string, vars?: any) => string }) => {
+const IOTexts = React.memo(({ plainText, cipherText, t }: { plainText: string, cipherText: string, t: ReturnType<typeof useTranslation> }) => {
     return (
         <group>
             <Text3D font={FONT_URL} size={0.6} height={0.1} position={[-15, 5, 0]}>
@@ -163,11 +162,9 @@ function AnimatedBlock({
 }
 
 // --- SCÈNE PRINCIPALE ---
-function Scene({ simulationData }: { simulationData: any }) {
+function Scene({ simulationData }: { simulationData: SimulationTrace | null }) {
     const { language } = useLanguage()
     const t = useTranslation(language)
-
-    const [isRunning, setIsRunning] = useState(false)
 
     const { plainText, cipherText } = useMemo(() => {
         if (!simulationData) {
@@ -178,26 +175,41 @@ function Scene({ simulationData }: { simulationData: any }) {
         // ET le résultat de 'execute' ('finalOutput')
 
         // 1. Trouve le texte d'origine dans les étapes de simulation
-        const plainText =
-            simulationData.steps?.[0]?.description.match(/'([^']+)'/)?.[1] || "CryptoLab"
+        const firstStep = simulationData.steps?.[0] as { description?: string } | undefined
+        const plainText = firstStep?.description?.match(/'([^']+)'/)?.[1] || "CryptoLab"
 
         // 2. Trouve le texte chiffré (tronqué)
-        const cipherHex = (simulationData.final_result_hex || ".....")
+        const cipherHex = typeof simulationData.final_result_hex === "string"
+            ? simulationData.final_result_hex
+            : "....."
         const cipherText = cipherHex.substring(0, 8) + "..."
 
         return { plainText, cipherText }
     }, [simulationData, t]) // Ajout de 't'
 
-    // Gérer le redémarrage
-    useEffect(() => {
+    // Demarre a `true` des qu'une simulation est fournie au premier rendu — la
+    // synchronisation avec les changements ulterieurs de `simulationData` est
+    // geree plus bas via la comparaison a une ref, pendant le rendu.
+    const [isRunning, setIsRunning] = useState(simulationData !== null)
+    // Compteur monotone (état, pas ref : sa valeur sert de clé JSX pendant le
+    // rendu) qui force le remontage de `AnimatedBlock` à chaque relance, sans
+    // dépendre d'une horloge (impure pendant le rendu).
+    const [runId, setRunId] = useState(0)
+    const previousData = useRef(simulationData)
+    /* eslint-disable react-hooks/refs -- comparaison a une ref pendant le rendu, motif documente par React ("Storing information from previous renders") */
+    if (previousData.current !== simulationData) {
+        previousData.current = simulationData
         if (simulationData) {
+            setRunId((id) => id + 1)
             setIsRunning(true)
         }
-    }, [simulationData])
+    }
+    /* eslint-enable react-hooks/refs */
 
     const handleAnimationComplete = () => {
         // Boucle
         setTimeout(() => {
+            setRunId((id) => id + 1)
             setIsRunning(true)
         }, 2000) // Pause de 2s
         setIsRunning(false)
@@ -210,7 +222,7 @@ function Scene({ simulationData }: { simulationData: any }) {
 
             {isRunning ? (
                 <AnimatedBlock
-                    key={Date.now()} // Force le re-montage
+                    key={runId} // Force le re-montage
                     textIn={plainText}
                     textOut={cipherText}
                     onComplete={handleAnimationComplete}
@@ -228,7 +240,7 @@ function Scene({ simulationData }: { simulationData: any }) {
     )
 }
 
-export function DesViz({ simulationData }: { simulationData: any }) {
+export function DesViz({ simulationData }: { simulationData: SimulationTrace | null }) {
     return (
         <Canvas camera={{ position: [0, 2, 18], fov: 60 }}>
             <ambientLight intensity={1.5} />
