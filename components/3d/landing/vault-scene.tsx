@@ -75,39 +75,43 @@ export function VaultScene({ className }: { className?: string }) {
                         des lampes ponctuelles ne produiraient que des taches.
                     */}
                     <Environment resolution={256}>
+                        {/* Studio neutre : deux grands panneaux presque blancs
+                            dessinent les reflets etires sur le metal. La couleur
+                            du theme n'intervient qu'en rim light discret — c'est
+                            l'accent qui signe la scene, pas un bain de neon. */}
                         <Lightformer
-                            intensity={3.2}
+                            intensity={2.6}
                             position={[5, 5, 2]}
                             scale={[9, 9, 1]}
-                            color={palette.secondary}
+                            color="#f4f4f6"
                         />
                         <Lightformer
-                            intensity={2.1}
+                            intensity={1.6}
                             position={[-6, 2, -3]}
                             scale={[7, 7, 1]}
-                            color={palette.primary}
+                            color="#dfe1e6"
                         />
                         {/* Bande etroite au ras du sol : c'est elle qui trace la
                             ligne brillante sur l'arete superieure des octets. */}
                         <Lightformer
-                            intensity={1.4}
+                            intensity={1.2}
                             position={[0, -3, 4]}
                             scale={[12, 1.6, 1]}
                             color="#ffffff"
                         />
                         <Lightformer
-                            intensity={0.9}
+                            intensity={0.55}
                             position={[0, 7, -6]}
                             scale={[10, 6, 1]}
                             color={palette.tertiary}
                         />
                     </Environment>
 
-                    <ambientLight intensity={0.22} />
+                    <ambientLight intensity={0.3} />
                     <directionalLight
                         position={[5, 8, 4]}
-                        intensity={1.4}
-                        color={palette.secondary}
+                        intensity={1.1}
+                        color="#f8f7fb"
                         castShadow
                         shadow-mapSize={[1024, 1024]}
                         shadow-camera-near={1}
@@ -147,15 +151,15 @@ function VaultFloor({ palette }: { palette: { background: string; primary: strin
                 // facon, et c'est la passe la plus couteuse de la scene.
                 resolution={512}
                 mixBlur={1}
-                mixStrength={18}
+                mixStrength={9}
                 blur={[380, 110]}
                 depthScale={1.1}
                 minDepthThreshold={0.4}
                 maxDepthThreshold={1.35}
-                roughness={0.85}
-                metalness={0.6}
+                roughness={0.9}
+                metalness={0.35}
                 color={palette.background}
-                mirror={0.45}
+                mirror={0.18}
             />
         </mesh>
     )
@@ -176,13 +180,13 @@ function PostProcessing({ animated }: { animated: boolean }) {
     return (
         <EffectComposer enableNormalPass={false} multisampling={animated ? 4 : 0}>
             <Bloom
-                luminanceThreshold={1}
-                luminanceSmoothing={0.35}
-                intensity={animated ? 1.15 : 0.8}
+                luminanceThreshold={1.1}
+                luminanceSmoothing={0.3}
+                intensity={animated ? 0.45 : 0.3}
                 mipmapBlur
-                radius={0.72}
+                radius={0.5}
             />
-            <Vignette offset={0.32} darkness={0.72} eskil={false} />
+            <Vignette offset={0.28} darkness={0.45} eskil={false} />
         </EffectComposer>
     )
 }

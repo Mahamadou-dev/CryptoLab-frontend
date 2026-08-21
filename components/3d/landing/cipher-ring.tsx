@@ -41,7 +41,10 @@ export function CipherRing({ palette, animated }: { palette: Palette; animated: 
     )
 
     const colors = useMemo(
-        () => ({ calm: new THREE.Color(palette.tertiary), active: new THREE.Color(palette.secondary) }),
+        () => ({
+            calm: new THREE.Color("#8a8d96").lerp(new THREE.Color(palette.tertiary), 0.18),
+            active: new THREE.Color(palette.secondary),
+        }),
         [palette.tertiary, palette.secondary],
     )
 
@@ -76,7 +79,7 @@ export function CipherRing({ palette, animated }: { palette: Palette; animated: 
             // Au-dela de 1, le bloom s'empare de la barre : seul l'arc actif
             // rayonne, le reste de l'anneau reste sobre.
             scratch.color.copy(colors.calm).lerp(colors.active, heat)
-            if (heat > 0.01) scratch.color.multiplyScalar(1 + heat * 1.8)
+            if (heat > 0.01) scratch.color.multiplyScalar(1 + heat * 0.9)
             mesh.setColorAt(index, scratch.color)
         }
 

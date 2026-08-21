@@ -18,7 +18,7 @@ import type { Palette } from "./use-theme-palette"
  * pour rester lisibles quel que soit l'angle.
  */
 
-const COUNT = 220
+const COUNT = 130
 const RADIUS_MIN = 3.6
 const RADIUS_MAX = 9
 const HEIGHT = 14
@@ -70,8 +70,8 @@ export function ByteStream({ palette, animated }: { palette: Palette; animated: 
 
     const colors = useMemo(
         () => ({
-            far: new THREE.Color(palette.primary),
-            near: new THREE.Color(palette.secondary),
+            far: new THREE.Color("#6d7078").lerp(new THREE.Color(palette.primary), 0.3),
+            near: new THREE.Color("#6d7078").lerp(new THREE.Color(palette.secondary), 0.5),
         }),
         [palette.primary, palette.secondary],
     )
@@ -109,7 +109,7 @@ export function ByteStream({ palette, animated }: { palette: Palette; animated: 
             // Fondu aux extremites, pour que rien n'apparaisse ni ne disparaisse net.
             const fade = Math.sin(climb * Math.PI)
             scratch.color.copy(colors.far).lerp(colors.near, nearness)
-            scratch.color.multiplyScalar(0.25 + fade * nearness * 1.1)
+            scratch.color.multiplyScalar(0.15 + fade * nearness * 0.55)
             mesh.setColorAt(index, scratch.color)
         }
 
@@ -122,7 +122,7 @@ export function ByteStream({ palette, animated }: { palette: Palette; animated: 
         <instancedMesh ref={meshRef} args={[geometry, undefined, COUNT]} frustumCulled={false}>
             <meshBasicMaterial
                 transparent
-                opacity={0.85}
+                opacity={0.55}
                 depthWrite={false}
                 blending={THREE.AdditiveBlending}
                 toneMapped={false}

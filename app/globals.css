@@ -120,13 +120,14 @@
     --surface-hover: color-mix(in srgb, var(--color-primary) 12%, transparent);
     --surface-active: color-mix(in srgb, var(--color-secondary) 16%, transparent);
 
-    --border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
-    --border-color-hover: color-mix(in srgb, var(--color-secondary) 38%, transparent);
+    --border-color: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    --border-color-hover: color-mix(in srgb, var(--color-secondary) 24%, transparent);
 
-    /* En clair, une ombre porte la profondeur mieux qu'un halo colore. */
+    /* Ombre neutre et sobre : la profondeur vient du gris, jamais d'un halo de
+       couleur. Un laboratoire academique se lit, il ne clignote pas. */
     --shadow-glow:
-        0 1px 2px rgb(20 16 28 / 0.04),
-        0 10px 30px color-mix(in srgb, var(--color-primary) 12%, transparent);
+        0 1px 2px rgb(20 16 28 / 0.05),
+        0 8px 20px rgb(20 16 28 / 0.06);
 }
 
 
@@ -145,19 +146,23 @@
     --foreground-secondary: color-mix(in srgb, var(--foreground) 72%, var(--background));
     --foreground-tertiary: color-mix(in srgb, var(--foreground) 50%, var(--background));
 
-    --bg-gradient-stop-1: color-mix(in srgb, var(--color-primary) 42%, transparent);
-    --bg-gradient-stop-2: color-mix(in srgb, var(--color-secondary) 30%, transparent);
+    --bg-gradient-stop-1: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    --bg-gradient-stop-2: color-mix(in srgb, var(--color-secondary) 14%, transparent);
 
     --surface: color-mix(in srgb, var(--color-primary) 16%, transparent);
     --surface-hover: color-mix(in srgb, var(--color-secondary) 20%, transparent);
     --surface-active: color-mix(in srgb, var(--color-secondary) 28%, transparent);
 
-    --border-color: color-mix(in srgb, var(--color-secondary) 28%, transparent);
-    --border-color-hover: color-mix(in srgb, var(--color-secondary) 48%, transparent);
+    --border-color: color-mix(in srgb, var(--color-secondary) 16%, transparent);
+    --border-color-hover: color-mix(in srgb, var(--color-secondary) 30%, transparent);
 
+    /* Meme en sombre, l'ombre reste une ombre : un liseré tres discret plutot
+       qu'un halo neon. La couleur reste reservee au sens (etat actif, cle,
+       alteration), jamais a la decoration des cartes. */
     --shadow-glow:
-        0 0 25px color-mix(in srgb, var(--color-secondary) 34%, transparent),
-        0 0 55px color-mix(in srgb, var(--color-primary) 22%, transparent);
+        0 1px 2px rgb(0 0 0 / 0.3),
+        0 8px 24px rgb(0 0 0 / 0.35),
+        0 0 0 1px color-mix(in srgb, var(--color-secondary) 8%, transparent);
 }
 
 

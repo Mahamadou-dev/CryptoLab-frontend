@@ -96,7 +96,9 @@ export function StateCube({
 
     const colors = useMemo(
         () => ({
-            calm: new THREE.Color(palette.primary).multiplyScalar(0.35),
+            // Acier au repos, tinte a peine par la couleur du theme : l'accent
+            // reste reserve a l'octet que l'onde traverse.
+            calm: new THREE.Color("#8a8d96").lerp(new THREE.Color(palette.primary), 0.12),
             active: new THREE.Color(palette.secondary),
         }),
         [palette.primary, palette.secondary],
@@ -132,7 +134,7 @@ export function StateCube({
             // La couleur d'instance sert d'emission : au-dela de 1, le bloom
             // s'en empare et l'octet actif devient une source lumineuse.
             scratch.color.copy(colors.calm).lerp(colors.active, eased)
-            if (eased > 0.01) scratch.color.multiplyScalar(1 + eased * 2.2)
+            if (eased > 0.01) scratch.color.multiplyScalar(1 + eased * 1.1)
             mesh.setColorAt(index, scratch.color)
         }
 
