@@ -153,7 +153,7 @@ export function SimulatorHash({
 
             {/* REMARQUE : Alerte d'erreur stylisée */}
             {error && (
-                <Alert variant="destructive" className="glass border-[var(--color-rose)]/50 text-[var(--color-rose)]">
+                <Alert variant="destructive" className="glass border-danger/50 text-danger">
                     <AlertTitle>{t("sim.apiError")}</AlertTitle>
                     <AlertDescription className="break-all">{error}</AlertDescription>
                 </Alert>

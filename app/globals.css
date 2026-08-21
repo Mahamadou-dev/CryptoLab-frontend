@@ -128,6 +128,15 @@
     --shadow-glow:
         0 1px 2px rgb(20 16 28 / 0.05),
         0 8px 20px rgb(20 16 28 / 0.06);
+
+    /* Couleurs semantiques : fixes, independantes du theme choisi. Une reussite
+       reste verte et une erreur reste rouge quel que soit l'accent decoratif
+       actif — le sens ne doit jamais dependre du choix esthetique.
+       Nommees sans le prefixe `color-` pour ne pas entrer en collision avec
+       le jeton Tailwind du meme nom dans le pont plus bas (meme principe que
+       --background / --color-background). */
+    --success: #15803d;
+    --danger: #b91c1c;
 }
 
 
@@ -163,6 +172,11 @@
         0 1px 2px rgb(0 0 0 / 0.3),
         0 8px 24px rgb(0 0 0 / 0.35),
         0 0 0 1px color-mix(in srgb, var(--color-secondary) 8%, transparent);
+
+    /* Plus clairs qu'en mode clair : sur fond presque-noir, le rouge et le vert
+       sombres du mode clair perdraient tout contraste. */
+    --success: #4ade80;
+    --danger: #f87171;
 }
 
 
@@ -220,6 +234,9 @@
     --color-rose: var(--color-rose);
     --color-magenta: var(--color-magenta);
     --color-indigo: var(--color-indigo);
+
+    --color-success: var(--success);
+    --color-danger: var(--danger);
 
     --font-sans: var(--font-sans);
     --font-mono: var(--font-mono);

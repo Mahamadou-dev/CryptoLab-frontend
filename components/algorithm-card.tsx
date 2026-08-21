@@ -14,9 +14,9 @@ import { useTranslation } from "@/lib/i18n"
 
 // ✅ Le mapping des couleurs est correct et utilise les clés i18n.
 const difficultyColors: Record<Difficulty, string> = {
-    "difficulty.beginner": "bg-green-500/20 text-green-300 border border-green-500/30",
+    "difficulty.beginner": "bg-success/20 text-success border border-success/30",
     "difficulty.intermediate": "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
-    "difficulty.advanced": "bg-red-500/20 text-red-300 border border-red-500/30",
+    "difficulty.advanced": "bg-danger/20 text-danger border border-danger/30",
 }
 
 interface AlgorithmCardProps {

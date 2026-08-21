@@ -360,7 +360,7 @@ export default function SimulatorPage() {
                     <Card className="glass lg:h-[450px] flex flex-col">
                         <CardHeader className="pb-4 border-b border-[var(--border-color)] flex-shrink-0">
                             <CardTitle className="flex items-center gap-2">
-                                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                <CheckCircle2 className="w-5 h-5 text-success" />
                                 {t("sim.results.title")}
                             </CardTitle>
                         </CardHeader>
@@ -463,7 +463,7 @@ export default function SimulatorPage() {
                                                                     // REMARQUE : Couleurs d'accent
                                                                     ? "bg-[var(--color-magenta)]"
                                                                     : isFinal
-                                                                        ? "bg-green-500"
+                                                                        ? "bg-success"
                                                                         : "bg-[var(--color-violet)]"
                                                             }`}
                                                         >

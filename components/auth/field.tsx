@@ -33,11 +33,11 @@ export function Field({
                 id={id}
                 aria-invalid={Boolean(error)}
                 aria-describedby={describedBy}
-                className={cn(error && "border-red-500/70 focus-visible:ring-red-500/40")}
+                className={cn(error && "border-danger/70 focus-visible:ring-danger/40")}
                 {...props}
             />
             {error ? (
-                <p id={`${id}-error`} className="text-xs text-red-400">
+                <p id={`${id}-error`} className="text-xs text-danger">
                     {error}
                 </p>
             ) : hint ? (

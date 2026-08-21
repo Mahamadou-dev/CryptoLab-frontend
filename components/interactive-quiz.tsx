@@ -104,8 +104,8 @@ export function InteractiveQuiz({ questions, onComplete }: InteractiveQuizProps)
               className={`w-full p-4 rounded-xl text-left font-medium transition-all ${
                 selectedAnswer === index
                   ? isCorrect
-                    ? "bg-green-500/20 border-2 border-green-500 text-green-300"
-                    : "bg-red-500/20 border-2 border-red-500 text-red-300"
+                    ? "bg-success/20 border-2 border-success text-success"
+                    : "bg-danger/20 border-2 border-danger text-danger"
                   : "glass border-2 hover:border-accent-primary"
               }`}
               style={
@@ -130,7 +130,7 @@ export function InteractiveQuiz({ questions, onComplete }: InteractiveQuizProps)
 
       {showResult && (
         <div
-          className={`p-4 rounded-xl ${isCorrect ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"}`}
+          className={`p-4 rounded-xl ${isCorrect ? "bg-success/20 text-success" : "bg-danger/20 text-danger"}`}
         >
           <p className="font-semibold mb-2">{isCorrect ? "Correct!" : "Incorrect"}</p>
           <p className="text-sm">{question.explanation}</p>

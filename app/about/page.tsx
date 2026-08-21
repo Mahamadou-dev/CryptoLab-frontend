@@ -145,7 +145,7 @@ export default function AboutPage() {
                     </CardHeader>
                     <CardContent>
                         {submitStatus === "success" ? (
-                            <div className="flex flex-col items-center justify-center text-center p-8 text-green-300">
+                            <div className="flex flex-col items-center justify-center text-center p-8 text-success">
                                 <CheckCircle className="w-16 h-16 mb-4" />
                                 <h3 className="text-2xl font-bold">{t("report.success.title", "Merci !")}</h3>
                                 <p>{t("report.success.desc", "Votre rapport a été envoyé.")}</p>
