@@ -63,6 +63,21 @@ export default function AlgorithmsPage() {
 
                 {catalog && <ProofBanner catalog={catalog} />}
 
+                <div className="mt-8 flex flex-wrap gap-4">
+                    <Link
+                        href="/lab/avalanche"
+                        className="glass rounded-lg px-4 py-2 text-sm font-semibold text-accent-secondary"
+                    >
+                        Voir l&apos;effet avalanche (SHA-256) →
+                    </Link>
+                    <Link
+                        href="/lab/entropy"
+                        className="glass rounded-lg px-4 py-2 text-sm font-semibold text-accent-secondary"
+                    >
+                        CSPRNG contre Math.random() →
+                    </Link>
+                </div>
+
                 {error && (
                     <p role="alert" className="glass mt-8 rounded-xl p-4 text-foreground-secondary">
                         {error}
