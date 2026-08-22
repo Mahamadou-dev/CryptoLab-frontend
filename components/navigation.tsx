@@ -1,8 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Lock } from "lucide-react"
+import { Lock, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeLanguageSwitcher } from "@/components/theme-language-switcher"
 import { UserMenu } from "@/components/auth/user-menu"
@@ -13,6 +14,15 @@ export function Navigation() {
     const pathname = usePathname()
     const { language } = useLanguage()
     const t = useTranslation(language)
+    const [mobileOpen, setMobileOpen] = useState(false)
+    // Reinitialise a chaque changement de route, sans passer par un effet
+    // (pattern "adjust state during render" recommande par React) : une
+    // page ne devrait jamais rester coincee ouverte apres une navigation.
+    const [lastPathname, setLastPathname] = useState(pathname)
+    if (pathname !== lastPathname) {
+        setLastPathname(pathname)
+        setMobileOpen(false)
+    }
 
     const navLinks = [
         { href: "/", label: t("nav.home", "Accueil") }, // Ajout de valeurs par défaut
@@ -75,8 +85,59 @@ export function Navigation() {
                     </Link>
                     <ThemeLanguageSwitcher />
                     <UserMenu />
+
+                    {/* Bascule mobile : sans elle, les liens ci-dessus (caches
+                        sous `md:`) sont totalement inaccessibles en dessous de
+                        768px. */}
+                    <button
+                        type="button"
+                        aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                        aria-expanded={mobileOpen}
+                        aria-controls="mobile-nav-panel"
+                        onClick={() => setMobileOpen((open) => !open)}
+                        className={cn(
+                            "flex h-9 w-9 items-center justify-center rounded-lg md:hidden",
+                            "border border-[var(--border-color)] hover:bg-[var(--surface-hover)] transition-colors",
+                        )}
+                    >
+                        {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                    </button>
                 </div>
             </div>
+
+            {/* Panneau mobile : pas de verrou de scroll (voir le bug du menu
+                compte, corrige le 22 aout) — un panneau qui pousse le contenu
+                plutot qu'une superposition modale. */}
+            {mobileOpen && (
+                <div
+                    id="mobile-nav-panel"
+                    className={cn(
+                        "flex flex-col gap-1 border-t border-[var(--border-color)] p-4 md:hidden",
+                        "bg-[var(--surface)]",
+                    )}
+                >
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className={cn(
+                                "rounded-lg px-4 py-3 text-sm transition-colors",
+                                pathname === link.href
+                                    ? "text-[var(--color-secondary)] bg-[var(--surface-active)]"
+                                    : "text-foreground-secondary hover:text-[var(--color-secondary)]",
+                            )}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                    <Link
+                        href="/simulations"
+                        className="btn-gemini mt-2 flex items-center justify-center text-sm"
+                    >
+                        Labs
+                    </Link>
+                </div>
+            )}
         </nav>
     )
 }
