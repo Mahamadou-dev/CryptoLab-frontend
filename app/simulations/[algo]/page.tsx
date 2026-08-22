@@ -97,6 +97,22 @@ const simulatorMap: Record<string, React.ComponentType<SimulatorProps>> = {
     ed25519: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="ed25519" />,
     dsa: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="dsa" />,
     elgamal: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="elgamal" />,
+
+    // Sprint 7 — classiques ajoutes au registre sans composant dedie : meme
+    // formulaire generique, le composant n'est pas specifique a l'asymetrique
+    // malgre son nom (herite du Sprint 6).
+    rot13: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="rot13" />,
+    atbash: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="atbash" />,
+    substitution: (props: SimulatorProps) => (
+        <SimulatorGenericAsymmetric {...props} algoId="substitution" />
+    ),
+    affine: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="affine" />,
+    hill: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="hill" />,
+    otp: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="otp" />,
+    frequencyanalysis: (props: SimulatorProps) => (
+        <SimulatorGenericAsymmetric {...props} algoId="frequencyanalysis" />
+    ),
+    enigma: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="enigma" />,
 }
 
 const vizMap: Record<string, React.ComponentType<{ simulationData: SimulationTrace | null }>> = {

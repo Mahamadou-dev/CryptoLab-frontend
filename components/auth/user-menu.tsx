@@ -51,7 +51,7 @@ export function UserMenu() {
     }
 
     return (
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
             <DropdownMenuTrigger
                 aria-label="Menu du compte"
                 className={cn(

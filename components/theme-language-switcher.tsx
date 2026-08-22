@@ -53,7 +53,7 @@ export function ThemeLanguageSwitcher() {
     return (
         <div className="flex items-center gap-2">
             {/* Color Theme Switcher (Maintenant complet) */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
@@ -83,7 +83,7 @@ export function ThemeLanguageSwitcher() {
             </DropdownMenu>
 
             {/* Theme Switcher (corrigé) */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
@@ -115,7 +115,7 @@ export function ThemeLanguageSwitcher() {
             </DropdownMenu>
 
             {/* Language Switcher (inchangé) */}
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
