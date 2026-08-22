@@ -8,7 +8,7 @@
 export const SESSION_COOKIE = "cryptolab_session"
 
 /** Routes exigeant une session. Lues par `middleware.ts`. */
-export const PROTECTED_PREFIXES = ["/learn", "/simulations"] as const
+export const PROTECTED_PREFIXES = ["/learn", "/simulations", "/lab"] as const
 
 export interface User {
     id: string
