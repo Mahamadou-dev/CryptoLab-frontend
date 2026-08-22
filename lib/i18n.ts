@@ -228,6 +228,12 @@ export const translations: Record<Language, Record<string, string>> = {
         "algo.enigma.name": "Enigma",
         "algo.enigma.description": "The WWII German rotor machine: three interchangeable rotors, a reflector, a plugboard",
         "algo.enigma.uses": "History of cryptanalysis|Bletchley Park|Why a letter never encrypts to itself",
+        "algo.kyber.name": "ML-KEM (Kyber-512)",
+        "algo.kyber.description": "NIST-standardized post-quantum key encapsulation (FIPS 203) — the candidate replacement for Diffie-Hellman/ECDH",
+        "algo.kyber.uses": "Post-quantum key exchange|Why Shor's algorithm threatens ECDH",
+        "algo.dilithium.name": "ML-DSA (Dilithium-44)",
+        "algo.dilithium.description": "NIST-standardized post-quantum digital signature (FIPS 204), based on lattice problems instead of discrete log or factoring",
+        "algo.dilithium.uses": "Post-quantum signatures|The lattice-based counterpart to ECDSA/Ed25519",
 
         // Categories
         "category.classic.name": "Classic Ciphers",
@@ -601,6 +607,12 @@ export const translations: Record<Language, Record<string, string>> = {
         "algo.enigma.name": "Enigma",
         "algo.enigma.description": "La machine à rotors allemande de la Seconde Guerre mondiale : rotors, réflecteur, tableau de connexions",
         "algo.enigma.uses": "Histoire de la cryptanalyse|Bletchley Park|Pourquoi une lettre ne se chiffre jamais en elle-même",
+        "algo.kyber.name": "ML-KEM (Kyber-512)",
+        "algo.kyber.description": "Encapsulation de clé post-quantique standardisée par le NIST (FIPS 203) — le remplaçant candidat de Diffie-Hellman/ECDH",
+        "algo.kyber.uses": "Échange de clés post-quantique|Pourquoi l'algorithme de Shor menace ECDH",
+        "algo.dilithium.name": "ML-DSA (Dilithium-44)",
+        "algo.dilithium.description": "Signature numérique post-quantique standardisée par le NIST (FIPS 204), fondée sur des réseaux euclidiens plutôt que le logarithme discret",
+        "algo.dilithium.uses": "Signatures post-quantiques|Le pendant à réseaux d'ECDSA/Ed25519",
 
         // Categories
         "category.classic.name": "Chiffres Classiques",

@@ -113,6 +113,10 @@ const simulatorMap: Record<string, React.ComponentType<SimulatorProps>> = {
         <SimulatorGenericAsymmetric {...props} algoId="frequencyanalysis" />
     ),
     enigma: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="enigma" />,
+    kyber: (props: SimulatorProps) => <SimulatorGenericAsymmetric {...props} algoId="kyber" />,
+    dilithium: (props: SimulatorProps) => (
+        <SimulatorGenericAsymmetric {...props} algoId="dilithium" />
+    ),
 }
 
 const vizMap: Record<string, React.ComponentType<{ simulationData: SimulationTrace | null }>> = {

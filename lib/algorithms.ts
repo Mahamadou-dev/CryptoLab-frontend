@@ -261,6 +261,25 @@ export const algorithms: Algorithm[] = [
         category: "asymmetric",
         uses: "algo.elgamal.uses",
     },
+    // Sprint 7 (fin) — post-quantique, meme formulaire generique.
+    {
+        id: "kyber",
+        name: "algo.kyber.name",
+        description: "algo.kyber.description",
+        difficulty: "difficulty.advanced",
+        icon: "🛰️",
+        category: "asymmetric",
+        uses: "algo.kyber.uses",
+    },
+    {
+        id: "dilithium",
+        name: "algo.dilithium.name",
+        description: "algo.dilithium.description",
+        difficulty: "difficulty.advanced",
+        icon: "🔮",
+        category: "asymmetric",
+        uses: "algo.dilithium.uses",
+    },
 ]
 
 export const categoryInfo = {
